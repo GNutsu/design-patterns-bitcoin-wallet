@@ -10,4 +10,4 @@ def get_bitcoin_service(request: Request) -> Any:
     return request.app.state.bitcoin
 
 
-BitcoinServiceDependable = Annotated[IBitcoinService, Depends(get_bitcoin_service())]
+BitcoinServiceDependable = Annotated[IBitcoinService, Depends(get_bitcoin_service)]
