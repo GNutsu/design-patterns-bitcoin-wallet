@@ -1,3 +1,9 @@
+all: ## Run all
+	make install
+	make format
+	make lint
+	make test
+
 install: ## Install requirements
 	python -m pip install -r requirements.txt
 
