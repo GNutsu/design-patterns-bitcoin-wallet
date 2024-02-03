@@ -18,6 +18,10 @@ class IUserService(ABC):
     def create_user(self) -> str:
         pass
 
+    @abstractmethod
+    def user_valid(self, api_key: str) -> bool:
+        pass
+
 
 @dataclass
 class UserService(IUserService):
@@ -31,6 +35,13 @@ class UserService(IUserService):
         self.repository_factory.get_repository().save(user_entity)
         self.logger.info(f"Created user, api_key = {api_key}")
         return api_key
+
+    def user_valid(self, api_key: str) -> bool:
+        self.logger.info("Checking if user is valid")
+        return (
+            self.repository_factory.get_repository().get(api_key, UserEntity.table_name)
+            is not None
+        )
 
 
 class UserServiceBuilder:
@@ -57,3 +68,6 @@ class UserServiceBuilder:
 class NullUserService(IUserService):
     def create_user(self) -> str:
         return "USER NOT CREATED"
+
+    def user_valid(self, api_key: str) -> bool:
+        return False
