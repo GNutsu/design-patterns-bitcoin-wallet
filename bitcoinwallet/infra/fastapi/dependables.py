@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from fastapi import Depends
 from fastapi.requests import Request
 
-from bitcoinwallet.core.bitcoin_service import IBitcoinService
+from bitcoinwallet.core.service.bitcoin_service import IBitcoinService
 
 
 def get_bitcoin_service(request: Request) -> Any:
