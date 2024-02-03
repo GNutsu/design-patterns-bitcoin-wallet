@@ -23,3 +23,6 @@ Python conventions:
 Use following command to install needed requirements `pip install -r requirements.txt`
 you can extend requirements.txt with more packages if you need to.
 
+Configuration for all the tools mentioned above is provided with the project.
+You can use `make` to run each of these tools or see how to run them manually
+inside the `Makefile`.
