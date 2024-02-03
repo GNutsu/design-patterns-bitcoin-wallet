@@ -10,8 +10,8 @@ cur = con.cursor()
 # Creating
 # cur.execute("CREATE TABLE USERS(api_key, wallet_count)")
 # cur.execute("CREATE TABLE WALLETS(address, owner_api_key, satoshi_balance)")
-# cur.execute("CREATE TABLE
-#               TRANSACTIONS(id, from_addr, to_addr, fee_price, transaction_time)")
+# cur.execute("""CREATE TABLE TRANSACTIONS(id, from_addr,
+# to_addr, amount, fee_cost, transaction_time)""")
 #
 # con.commit()
 

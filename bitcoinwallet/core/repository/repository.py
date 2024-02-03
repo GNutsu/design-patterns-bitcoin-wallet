@@ -5,7 +5,7 @@ from bitcoinwallet.core.repository.entity import Entity, NullEntity
 
 class IRepository(ABC):
     @abstractmethod
-    def get(self) -> Entity:
+    def get(self, id: str, table_name: str) -> Entity:
         pass
 
     @abstractmethod
@@ -14,7 +14,7 @@ class IRepository(ABC):
 
 
 class NullRepository(IRepository):
-    def get(self) -> Entity:
+    def get(self, id: str, table_name: str) -> Entity:
         return NullEntity()
 
     def save(self, entity: Entity) -> None:
