@@ -12,6 +12,7 @@ from bitcoinwallet.core.service.transaction_service import (
 from bitcoinwallet.core.service.user_service import IUserService, NullUserService
 from bitcoinwallet.core.service.wallet_service import IWalletService, NullWalletService
 from bitcoinwallet.core.utils import ConsoleLogger, ILogger
+from definitoins import BITCOIN_FEE_PERCENTAGE
 
 TBitcoinService = TypeVar("TBitcoinService", bound="BitcoinServiceBuilder")
 
@@ -40,10 +41,6 @@ class BitcoinService(IBitcoinService):
     logger: ILogger
     config: ConfigParser = field(init=False)
 
-    def __post_init__(self) -> None:
-        self.config = ConfigParser()
-        self.config.read("properties.ini")
-
     def create_user(self) -> str:
         self.logger.info("Creating user")
         api_key = self.user_service.create_user()
@@ -68,11 +65,7 @@ class BitcoinService(IBitcoinService):
         fee_for_transaction = 0
 
         if first_owner != second_owner:
-            fee_percentage = self.config.getfloat("bitcoin", "bitcoin_fee_percentage")
-            fee_for_transaction = math.ceil(amount * fee_percentage / 100)
-            self.logger.info(
-                f"Counted fee price for transaction: {fee_for_transaction}"
-            )
+            fee_for_transaction = math.ceil(amount * BITCOIN_FEE_PERCENTAGE / 100)
         self.logger.info(f"Fee for transaction is:  {fee_for_transaction}")
         self.wallet_service.withdraw(
             user_api_key=user_api_key,
