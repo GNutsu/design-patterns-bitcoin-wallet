@@ -1,32 +1,62 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 
 
 class Entity(ABC):
+    @staticmethod
     @abstractmethod
-    def get_table_name(self) -> str:
+    def get_table_name() -> str:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_primary_key() -> str:
         pass
 
 
 class NullEntity(Entity):
-    def get_table_name(self) -> str:
+    @staticmethod
+    def get_table_name() -> str:
         return "NULL TABLE"
+
+    @staticmethod
+    def get_primary_key() -> str:
+        return "NULL"
 
 
 @dataclass
 class UserEntity(Entity):
-    table_name: str = field(default="users", init=False)
     api_key: str
     wallet_count: int
 
-    def get_table_name(self) -> str:
-        return self.table_name
+    @staticmethod
+    def get_table_name() -> str:
+        return "users"
+
+    @staticmethod
+    def get_primary_key() -> str:
+        return "api_key"
+
+
+@dataclass
+class WalletEntity(Entity):
+    id: str
+    owner_api_key: str
+    balance: int
+    creation_time: datetime
+
+    @staticmethod
+    def get_table_name() -> str:
+        return "wallets"
+
+    @staticmethod
+    def get_primary_key() -> str:
+        return "id"
 
 
 @dataclass
 class TransactionEntity(Entity):
-    table_name: str = field(default="transactions", init=False)
     id: str
     from_addr: str
     to_addr: str
@@ -34,5 +64,10 @@ class TransactionEntity(Entity):
     fee_cost: int
     transaction_time: datetime
 
-    def get_table_name(self) -> str:
-        return self.table_name
+    @staticmethod
+    def get_table_name() -> str:
+        return "transactions"
+
+    @staticmethod
+    def get_primary_key() -> str:
+        return "id"
