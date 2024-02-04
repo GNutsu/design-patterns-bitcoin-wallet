@@ -4,7 +4,7 @@ from configparser import ConfigParser
 from dataclasses import dataclass, field
 from typing import TypeVar
 
-from bitcoinwallet.core.service.exception import UserNotFoundException
+from bitcoinwallet.core.model.exception.exception import UserNotFoundException
 from bitcoinwallet.core.service.transaction_service import (
     ITransactionService,
     NullTransactionService,

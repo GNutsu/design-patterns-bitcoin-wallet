@@ -36,3 +36,15 @@ class TransactionEntity(Entity):
 
     def get_table_name(self) -> str:
         return self.table_name
+
+
+@dataclass
+class WalletEntity(Entity):
+    table_name: str = field(default="wallets", init=False)
+    address: str
+    user_api_key: str
+    balance_satoshi: int
+    creation_time: datetime
+
+    def get_table_name(self) -> str:
+        return self.table_name

@@ -16,3 +16,17 @@ class CreateTransactionRequest(BaseModel):
     from_wallet_address: str
     to_wallet_address: str
     amount: int
+
+
+class WalletBalanceResponse(BaseModel):
+    btc_balance: float
+    usd_balance: float
+
+
+class TransactionResponse(BaseModel):
+    transaction_id: str
+    source_wallet_address: str
+    destination_wallet_address: str
+    amount: float
+    fee: float
+    timestamp: str

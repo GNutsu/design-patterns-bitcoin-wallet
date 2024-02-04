@@ -1,7 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
-from bitcoinwallet.core.service.exception import ForbiddenException, NotFoundException
+from bitcoinwallet.core.model.exception.exception import ForbiddenException, NotFoundException
 
 
 def not_found_exception_handler(
