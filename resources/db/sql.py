@@ -1,28 +1,54 @@
+import os
 import sqlite3
 
-#
-# #
-DATABASE_PATH = "bw_db.db"
-#
-con = sqlite3.connect(DATABASE_PATH)
-cur = con.cursor()
 
-# Creating
-# cur.execute("CREATE TABLE USERS(api_key, wallet_count)")
-# cur.execute("CREATE TABLE WALLETS(address, owner_api_key, satoshi_balance)")
-# cur.execute("""CREATE TABLE TRANSACTIONS(id, from_addr,
-# to_addr, amount, fee_cost, transaction_time)""")
-#
-# con.commit()
+def db_setup(db_path: str) -> str:
+    if not os.path.exists(db_path):
+        open(db_path, "w").close()
 
-# DROPPING
-# cur.execute("DROP TABLE USERS")
-# cur.execute("DROP TABLE WALLETS")
-# cur.execute("DROP TABLE TRANSACTIONS")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
 
-print(cur.execute("SELECT * FROM USERS").fetchall())
-res = cur.execute("SELECT name FROM sqlite_master")
-print(res.fetchall())
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            api_key PRIMARY KEY,
+            wallet_count
+        )
+    """
+    )
 
-print(cur.execute("SELECT * FROM USERS").fetchall())
-print(cur.execute("SELECT * FROM TRANSACTIONS").fetchall())
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS wallets (
+            id PRIMARY KEY,
+            owner_api_key,
+            balance,
+            creation_time,
+            FOREIGN KEY(owner_api_key) REFERENCES users(api_key)
+        )
+    """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS transactions (
+            id PRIMARY KEY,
+            from_addr,
+            to_addr,
+            amount,
+            fee_cost,
+            transaction_time,
+            FOREIGN KEY(from_addr) REFERENCES wallets(id),
+            FOREIGN KEY(to_addr) REFERENCES wallets(id)
+        )
+    """
+    )
+
+    conn.commit()
+    conn.close()
+
+    return db_path
+
+
+db_setup("bw_db.db")

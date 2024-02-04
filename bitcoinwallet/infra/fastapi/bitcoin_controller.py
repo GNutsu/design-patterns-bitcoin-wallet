@@ -1,15 +1,17 @@
 from typing import List
 
 from fastapi import APIRouter, status, Header, HTTPException
+from fastapi import APIRouter, Depends, status
 
-from bitcoinwallet.infra.fastapi.dependables import BitcoinServiceDependable
-from bitcoinwallet.infra.fastapi.model import (
+from bitcoinwallet.core.model.model import (
     CreateTransactionRequest,
     CreateUserResponse,
+    ListTransactionsResponse,
     CreateWalletResponse,
     WalletBalanceResponse,
-    TransactionResponse,
-)
+    )
+from bitcoinwallet.infra.fastapi.dependables import BitcoinServiceDependable
+from bitcoinwallet.infra.fastapi.interceptor.validity_interceptor import verify_api_key
 
 bitcoin_api = APIRouter(tags=["Bitcoin"])
 
@@ -24,15 +26,28 @@ def create_user(bitcoin_service: BitcoinServiceDependable) -> CreateUserResponse
 
 @bitcoin_api.post("/transactions", status_code=status.HTTP_201_CREATED)
 def create_transaction(
-        transaction_request: CreateTransactionRequest,
-        bitcoin_service: BitcoinServiceDependable,
+    transaction_request: CreateTransactionRequest,
+    bitcoin_service: BitcoinServiceDependable,
+    api_key: str = Depends(verify_api_key),
 ) -> str:
     return bitcoin_service.create_transaction(
-        transaction_request.user_api_key,
+        api_key,
         transaction_request.from_wallet_address,
         transaction_request.from_wallet_address,
         transaction_request.amount,
     )
+
+
+@bitcoin_api.get(
+    "/transactions",
+    status_code=status.HTTP_200_OK,
+    response_model=ListTransactionsResponse,
+)
+def get_transactions(
+    bitcoin_service: BitcoinServiceDependable, api_key: str = Depends(verify_api_key)
+) -> ListTransactionsResponse:
+    transactions = bitcoin_service.get_transactions(api_key)
+    return ListTransactionsResponse(transactions=transactions)
 
 
 @bitcoin_api.post("wallets", status_code=status.HTTP_201_CREATED, response_model=CreateWalletResponse)
