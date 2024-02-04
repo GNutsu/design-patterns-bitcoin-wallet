@@ -36,11 +36,11 @@ def create_transaction(
 
 
 @bitcoin_api.get("/wallets/{address}/transactions", status_code=status.HTTP_200_OK)
-def get_transactions(
+def get_addr_transactions(
     bitcoin_service: BitcoinServiceDependable,
     get_transactions_request: GetTransactionsRequest,
     address: str = Path(...),
 ) -> GetTransactionsResponse:
-    return bitcoin_service.get_transactions(
+    return bitcoin_service.get_addr_transactions(
         get_transactions_request.user_api_key, address
     )

@@ -24,7 +24,9 @@ class ITransactionService(ABC):
         pass
 
     @abstractmethod
-    def get_transactions(self, user_api_key: str, address: str) -> List[Transaction]:
+    def get_addr_transactions(
+        self, user_api_key: str, address: str
+    ) -> List[Transaction]:
         pass
 
 
@@ -50,7 +52,7 @@ class TransactionService(ITransactionService):
         self.logger.info(f"Created transaction, id = {id}")
         return id
 
-    def get_transactions(self, api_key: str, address: str) -> List[Transaction]:
+    def get_addr_transactions(self, api_key: str, address: str) -> List[Transaction]:
         pass
 
 

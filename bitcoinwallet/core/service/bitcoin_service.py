@@ -37,7 +37,9 @@ class IBitcoinService(ABC):
         pass
 
     @abstractmethod
-    def get_transactions(self, user_api_key: str, address: str) -> List[Transaction]:
+    def get_addr_transactions(
+        self, user_api_key: str, address: str
+    ) -> List[Transaction]:
         pass
 
 
@@ -54,7 +56,9 @@ class BitcoinService(IBitcoinService):
         api_key = self.user_service.create_user()
         return api_key
 
-    def get_transactions(self, user_api_key: str, address: str) -> List[Transaction]:
+    def get_addr_transactions(
+        self, user_api_key: str, address: str
+    ) -> List[Transaction]:
         self.logger.info(
             f"Getting transactions for user_api_key:"
             f" {user_api_key} from_wallet_addr: {address}"
@@ -63,7 +67,7 @@ class BitcoinService(IBitcoinService):
             raise UserHasNoRightOnWalletException(
                 api_key=user_api_key, wallet_address=address
             )
-        transactions_list = self.transaction_service.get_transactions(
+        transactions_list = self.transaction_service.get_addr_transactions(
             user_api_key, address
         )
         return transactions_list
