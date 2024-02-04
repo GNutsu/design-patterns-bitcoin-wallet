@@ -12,7 +12,7 @@ def db_setup(db_path: str) -> str:
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS users (
-            api_key TEXT PRIMARY KEY,
+            api_key PRIMARY KEY,
             wallet_count
         )
     """
@@ -21,7 +21,7 @@ def db_setup(db_path: str) -> str:
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS wallets (
-            id INTEGER PRIMARY KEY,
+            id PRIMARY KEY,
             owner_api_key,
             balance,
             creation_time,
@@ -33,7 +33,7 @@ def db_setup(db_path: str) -> str:
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY,
+            id PRIMARY KEY,
             from_addr,
             to_addr,
             amount,
