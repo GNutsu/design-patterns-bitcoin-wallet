@@ -45,7 +45,9 @@ class TransactionService(ITransactionService):
             fee_cost=fee_cost,
             transaction_time=datetime.now(),
         )
-        self.repository_factory.get_repository().save(transaction_entity)
+        self.repository_factory.get_repository(TransactionEntity).create(
+            transaction_entity
+        )
         self.logger.info(f"Created transaction, id = {id}")
         return id
 

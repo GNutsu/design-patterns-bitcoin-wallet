@@ -135,7 +135,7 @@ class Repository(IRepository):
         else:
             return "BLOB"
 
-    def _create_entity(self, result) -> Entity:
+    def _create_entity(self, result: list[list[str]]) -> Entity:
         field_names = self._entity_class.__dataclass_fields__.keys()
         entity_data = dict(zip(field_names, result))
         return self._entity_class(**entity_data)
