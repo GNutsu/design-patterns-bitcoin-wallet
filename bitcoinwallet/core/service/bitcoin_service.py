@@ -4,15 +4,15 @@ from configparser import ConfigParser
 from dataclasses import dataclass, field
 from typing import TypeVar
 
-from bitcoinwallet.core.service.exception import UserNotFoundException
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
+from bitcoinwallet.core.model.model import TransactionModel
 from bitcoinwallet.core.service.transaction_service import (
     ITransactionService,
     NullTransactionService,
 )
 from bitcoinwallet.core.service.user_service import IUserService, NullUserService
 from bitcoinwallet.core.service.wallet_service import IWalletService, NullWalletService
-from bitcoinwallet.core.utils import ConsoleLogger, ILogger
-from definitoins import BITCOIN_FEE_PERCENTAGE
+from definitions import BITCOIN_FEE_PERCENTAGE
 
 TBitcoinService = TypeVar("TBitcoinService", bound="BitcoinServiceBuilder")
 
@@ -30,6 +30,14 @@ class IBitcoinService(ABC):
         to_wallet_addr: str,
         amount: int,
     ) -> str:
+        pass
+
+    @abstractmethod
+    def get_transactions(self, api_key: str) -> list[TransactionModel]:
+        pass
+
+    @abstractmethod
+    def user_valid(self, api_key: str) -> bool:
         pass
 
 
@@ -58,8 +66,6 @@ class BitcoinService(IBitcoinService):
             f"from_wallet_addr: {from_wallet_addr} "
             f"to_wallet_addr: {to_wallet_addr}, amount: {amount}"
         )
-        if not self.user_service.user_valid(user_api_key):
-            raise UserNotFoundException(api_key=user_api_key)
         first_owner = self.wallet_service.get_owner_api_key()
         second_owner = self.wallet_service.get_owner_api_key()
         fee_for_transaction = 0
@@ -79,6 +85,14 @@ class BitcoinService(IBitcoinService):
             amount=amount,
             fee_cost=fee_for_transaction,
         )
+
+    def get_transactions(self, api_key: str) -> list[TransactionModel]:
+        self.logger.info(f"Collecting transactions for {api_key}")
+        return self.transaction_service.get_transactions(api_key)
+
+    def user_valid(self, api_key: str) -> bool:
+        self.logger.info(f"Checking user validity: {api_key}")
+        return self.user_service.user_valid(api_key)
 
 
 class BitcoinServiceBuilder:

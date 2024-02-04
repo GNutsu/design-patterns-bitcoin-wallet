@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar
 
-from bitcoinwallet.core.repository.entity import UserEntity
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
+from bitcoinwallet.core.model.entity import UserEntity
 from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
-from bitcoinwallet.core.utils import ConsoleLogger, ILogger
 
 TUserService = TypeVar("TUserService", bound="UserServiceBuilder")
 

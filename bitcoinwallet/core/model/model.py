@@ -12,7 +12,17 @@ class CreateWalletResponse(BaseModel):
 
 
 class CreateTransactionRequest(BaseModel):
-    user_api_key: str
     from_wallet_address: str
     to_wallet_address: str
     amount: int
+
+
+class TransactionModel(BaseModel):
+    from_wallet_address: str
+    to_wallet_address: str
+    amount: int
+    fee_price: int
+
+
+class ListTransactionsResponse(BaseModel):
+    transactions: list[TransactionModel]
