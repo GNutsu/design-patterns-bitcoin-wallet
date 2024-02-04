@@ -1,24 +1,22 @@
 import sqlite3
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, List, Optional, Tuple, Type, Union
 
 from bitcoinwallet.core.model.entity import Entity
 from bitcoinwallet.core.model.query import Logical, Operator
 
-T = TypeVar("T", bound=Entity)
-
 
 class IRepository(ABC):
     @abstractmethod
-    def create(self, entity: T) -> None:
+    def create(self, entity: Entity) -> None:
         pass
 
     @abstractmethod
-    def read(self, entity_id: str) -> Optional[T]:
+    def read(self, entity_id: str) -> Optional[Entity]:
         pass
 
     @abstractmethod
-    def update(self, entity: T) -> None:
+    def update(self, entity: Entity) -> None:
         pass
 
     @abstractmethod
@@ -26,18 +24,18 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_field(self, field_name: str, field_value: Any) -> List[T]:
+    def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         pass
 
 
 class Repository(IRepository):
-    def __init__(self, entity_class: Type[T], db_path: str):
+    def __init__(self, entity_class: Type[Entity], db_path: str):
         self._entity_class = entity_class
         self._db_path = db_path
         self._connection = sqlite3.connect(db_path)
         self._cursor = self._connection.cursor()
 
-    def create(self, entity: T) -> None:
+    def create(self, entity: Entity) -> None:
         table_name = self._entity_class.get_table_name()
         columns = ", ".join(entity.__dict__.keys())
         placeholders = ", ".join(["?" for _ in entity.__dict__.values()])
@@ -46,7 +44,7 @@ class Repository(IRepository):
         self._cursor.execute(query, values)
         self._connection.commit()
 
-    def read(self, entity_id: str) -> Optional[T]:
+    def read(self, entity_id: str) -> Optional[Entity]:
         table_name = self._entity_class.get_table_name()
         primary_key = self._entity_class.get_primary_key()
 
@@ -55,7 +53,7 @@ class Repository(IRepository):
         result = self._cursor.fetchone()
         return self._create_entity(result) if result else None
 
-    def update(self, entity: T) -> None:
+    def update(self, entity: Entity) -> None:
         table_name = self._entity_class.get_table_name()
         set_clause = ", ".join([f"{key} = ?" for key in entity.__dict__.keys()])
         primary_key = self._entity_class.get_primary_key()
@@ -71,7 +69,7 @@ class Repository(IRepository):
         self._cursor.execute(query, (entity_id,))
         self._connection.commit()
 
-    def get_by_field(self, field_name: str, field_value: Any) -> List[T]:
+    def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         table_name = self._entity_class.get_table_name()
         query = f"SELECT * FROM {table_name} WHERE {field_name} = ?"
         self._cursor.execute(query, (field_value,))
@@ -137,24 +135,24 @@ class Repository(IRepository):
         else:
             return "BLOB"
 
-    def _create_entity(self, result) -> T:
+    def _create_entity(self, result: list[list[str]]) -> Entity:
         field_names = self._entity_class.__dataclass_fields__.keys()
         entity_data = dict(zip(field_names, result))
         return self._entity_class(**entity_data)
 
 
 class NullRepository(IRepository):
-    def create(self, entity: T) -> None:
+    def create(self, entity: Entity) -> None:
         pass
 
-    def read(self, entity_id: str) -> Optional[T]:
+    def read(self, entity_id: str) -> Optional[Entity]:
         return None
 
-    def update(self, entity: T) -> None:
+    def update(self, entity: Entity) -> None:
         pass
 
     def delete(self, entity_id: str) -> None:
         pass
 
-    def get_by_field(self, field_name: str, field_value: Any) -> List[T]:
-        return List[T]()
+    def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
+        return List[Entity]()
