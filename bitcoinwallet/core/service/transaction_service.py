@@ -1,7 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TypeVar
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
@@ -11,6 +10,7 @@ from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
+from bitcoinwallet.core.util import datetime_now
 
 TTransactionService = TypeVar("TTransactionService", bound="TransactionServiceBuilder")
 
@@ -43,7 +43,7 @@ class TransactionService(ITransactionService):
             to_addr=to_addr,
             amount=amount,
             fee_cost=fee_cost,
-            transaction_time=datetime.now(),
+            transaction_time=datetime_now(),
         )
         self.repository_factory.get_repository(TransactionEntity).create(
             transaction_entity

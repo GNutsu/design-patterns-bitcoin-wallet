@@ -14,7 +14,7 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def read(self, entity_id: str) -> Optional[T]:
+    def read(self, entity_id: str) -> Optional[Entity]:
         pass
 
     @abstractmethod
@@ -26,7 +26,7 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_field(self, field_name: str, field_value: Any) -> List[T]:
+    def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         pass
 
 
@@ -46,7 +46,7 @@ class Repository(IRepository):
         self._cursor.execute(query, values)
         self._connection.commit()
 
-    def read(self, entity_id: str) -> Optional[T]:
+    def read(self, entity_id: str) -> Optional[Entity]:
         table_name = self._entity_class.get_table_name()
         primary_key = self._entity_class.get_primary_key()
 
@@ -71,7 +71,7 @@ class Repository(IRepository):
         self._cursor.execute(query, (entity_id,))
         self._connection.commit()
 
-    def get_by_field(self, field_name: str, field_value: Any) -> List[T]:
+    def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         table_name = self._entity_class.get_table_name()
         query = f"SELECT * FROM {table_name} WHERE {field_name} = ?"
         self._cursor.execute(query, (field_value,))
@@ -126,18 +126,7 @@ class Repository(IRepository):
         results = self._cursor.fetchall()
         return [self._create_entity(result) for result in results]
 
-    @staticmethod
-    def _get_sqlite_type(value: Any) -> str:
-        if isinstance(value, int):
-            return "INTEGER"
-        elif isinstance(value, str):
-            return "TEXT"
-        elif isinstance(value, float):
-            return "REAL"
-        else:
-            return "BLOB"
-
-    def _create_entity(self, result) -> T:
+    def _create_entity(self, result: Any) -> Entity:
         field_names = self._entity_class.__dataclass_fields__.keys()
         entity_data = dict(zip(field_names, result))
         return self._entity_class(**entity_data)
@@ -147,7 +136,7 @@ class NullRepository(IRepository):
     def create(self, entity: T) -> None:
         pass
 
-    def read(self, entity_id: str) -> Optional[T]:
+    def read(self, entity_id: str) -> Optional[Entity]:
         return None
 
     def update(self, entity: T) -> None:
@@ -156,5 +145,5 @@ class NullRepository(IRepository):
     def delete(self, entity_id: str) -> None:
         pass
 
-    def get_by_field(self, field_name: str, field_value: Any) -> List[T]:
-        return List[T]()
+    def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
+        return List[Entity]()
