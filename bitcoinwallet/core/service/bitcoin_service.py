@@ -2,9 +2,12 @@ import math
 from abc import ABC, abstractmethod
 from configparser import ConfigParser
 from dataclasses import dataclass, field
-from typing import TypeVar
+from typing import List, TypeVar
 
-from bitcoinwallet.core.service.exception import UserNotFoundException
+from bitcoinwallet.core.service.exception import (
+    UserHasNoRightOnWalletException,
+    UserNotFoundException,
+)
 from bitcoinwallet.core.service.transaction_service import (
     ITransactionService,
     NullTransactionService,
@@ -12,6 +15,7 @@ from bitcoinwallet.core.service.transaction_service import (
 from bitcoinwallet.core.service.user_service import IUserService, NullUserService
 from bitcoinwallet.core.service.wallet_service import IWalletService, NullWalletService
 from bitcoinwallet.core.utils import ConsoleLogger, ILogger
+from bitcoinwallet.infra.fastapi.model import Transaction
 from definitoins import BITCOIN_FEE_PERCENTAGE
 
 TBitcoinService = TypeVar("TBitcoinService", bound="BitcoinServiceBuilder")
@@ -32,6 +36,10 @@ class IBitcoinService(ABC):
     ) -> str:
         pass
 
+    @abstractmethod
+    def get_transactions(self, user_api_key: str, address: str) -> List[Transaction]:
+        pass
+
 
 @dataclass
 class BitcoinService(IBitcoinService):
@@ -45,6 +53,20 @@ class BitcoinService(IBitcoinService):
         self.logger.info("Creating user")
         api_key = self.user_service.create_user()
         return api_key
+
+    def get_transactions(self, user_api_key: str, address: str) -> List[Transaction]:
+        self.logger.info(
+            f"Getting transactions for user_api_key:"
+            f" {user_api_key} from_wallet_addr: {address}"
+        )
+        if self.wallet_service.hasUerWallet(user_api_key, address) is None:
+            raise UserHasNoRightOnWalletException(
+                api_key=user_api_key, wallet_address=address
+            )
+        transactions_list = self.transaction_service.get_transactions(
+            user_api_key, address
+        )
+        return transactions_list
 
     def create_transaction(
         self,

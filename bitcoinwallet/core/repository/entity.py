@@ -4,13 +4,15 @@ from datetime import datetime
 
 
 class Entity(ABC):
+    @staticmethod
     @abstractmethod
-    def get_table_name(self) -> str:
+    def get_table_name() -> str:
         pass
 
 
 class NullEntity(Entity):
-    def get_table_name(self) -> str:
+    @staticmethod
+    def get_table_name() -> str:
         return "NULL TABLE"
 
 
@@ -20,8 +22,9 @@ class UserEntity(Entity):
     api_key: str
     wallet_count: int
 
-    def get_table_name(self) -> str:
-        return self.table_name
+    @staticmethod
+    def get_table_name() -> str:
+        return "users"
 
 
 @dataclass
@@ -34,5 +37,19 @@ class TransactionEntity(Entity):
     fee_cost: int
     transaction_time: datetime
 
-    def get_table_name(self) -> str:
-        return self.table_name
+    @staticmethod
+    def get_table_name() -> str:
+        return "transactions"
+
+
+@dataclass
+class WalletEntity(Entity):
+    table_name: str = field(default="wallets", init=False)
+    id: str
+    owner_api_key: str
+    balance: int
+    creation_time: datetime
+
+    @staticmethod
+    def get_table_name() -> str:
+        return "wallets"

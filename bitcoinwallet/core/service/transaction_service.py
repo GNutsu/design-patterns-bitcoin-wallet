@@ -2,14 +2,16 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypeVar
+from typing import List, TypeVar
 
 from bitcoinwallet.core.repository.entity import TransactionEntity
 from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
+from bitcoinwallet.core.service.exception import UserHasNoRightOnWalletException
 from bitcoinwallet.core.utils import ConsoleLogger, ILogger
+from bitcoinwallet.infra.fastapi.model import Transaction
 
 TTransactionService = TypeVar("TTransactionService", bound="TransactionServiceBuilder")
 
@@ -19,6 +21,10 @@ class ITransactionService(ABC):
     def create_transaction(
         self, from_addr: str, to_addr: str, amount: int, fee_cost: int
     ) -> str:
+        pass
+
+    @abstractmethod
+    def get_transactions(self, user_api_key: str, address: str) -> List[Transaction]:
         pass
 
 
@@ -43,6 +49,9 @@ class TransactionService(ITransactionService):
         self.repository_factory.get_repository().save(transaction_entity)
         self.logger.info(f"Created transaction, id = {id}")
         return id
+
+    def get_transactions(self, api_key: str, address: str) -> List[Transaction]:
+        pass
 
 
 class TransactionServiceBuilder:
