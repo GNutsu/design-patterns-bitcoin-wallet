@@ -2,16 +2,15 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, TypeVar
+from typing import TypeVar
 
-from bitcoinwallet.core.repository.entity import TransactionEntity
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
+from bitcoinwallet.core.model.entity import TransactionEntity
+from bitcoinwallet.core.model.model import TransactionModel
 from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
-from bitcoinwallet.core.service.exception import UserHasNoRightOnWalletException
-from bitcoinwallet.core.utils import ConsoleLogger, ILogger
-from bitcoinwallet.infra.fastapi.model import Transaction
 
 TTransactionService = TypeVar("TTransactionService", bound="TransactionServiceBuilder")
 
@@ -21,6 +20,10 @@ class ITransactionService(ABC):
     def create_transaction(
         self, from_addr: str, to_addr: str, amount: int, fee_cost: int
     ) -> str:
+        pass
+
+    @abstractmethod
+    def get_transactions(self, api_key: str) -> list[TransactionModel]:
         pass
 
     @abstractmethod
@@ -48,12 +51,18 @@ class TransactionService(ITransactionService):
             fee_cost=fee_cost,
             transaction_time=datetime.now(),
         )
-        self.repository_factory.get_repository().save(transaction_entity)
+        self.repository_factory.get_repository(TransactionEntity).create(
+            transaction_entity
+        )
         self.logger.info(f"Created transaction, id = {id}")
         return id
 
     def get_addr_transactions(self, api_key: str, address: str) -> List[Transaction]:
         pass
+
+    def get_transactions(self, api_key: str) -> list[TransactionModel]:
+        self.logger.info(f"Collecting transactions for api_key: {api_key}")
+        return []
 
 
 class TransactionServiceBuilder:
@@ -82,3 +91,6 @@ class NullTransactionService(ITransactionService):
         self, from_addr: str, to_addr: str, amount: int, fee_cost: int
     ) -> str:
         return "TRANSACTION NOT CREATED"
+
+    def get_transactions(self, api_key: str) -> list[TransactionModel]:
+        return []

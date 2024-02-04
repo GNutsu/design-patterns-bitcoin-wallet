@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar
 
-from bitcoinwallet.core.repository.entity import UserEntity
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
+from bitcoinwallet.core.model.entity import UserEntity
 from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
-from bitcoinwallet.core.utils import ConsoleLogger, ILogger
 
 TUserService = TypeVar("TUserService", bound="UserServiceBuilder")
 
@@ -32,15 +32,16 @@ class UserService(IUserService):
         self.logger.info("Creating new user")
         api_key = str(uuid.uuid4())
         user_entity = UserEntity(api_key=api_key, wallet_count=0)
-        self.repository_factory.get_repository().save(user_entity)
+        self.repository_factory.get_repository(user_entity.__class__).create(
+            user_entity
+        )
         self.logger.info(f"Created user, api_key = {api_key}")
         return api_key
 
     def user_valid(self, api_key: str) -> bool:
         self.logger.info("Checking if user is valid")
         return (
-            self.repository_factory.get_repository().get(api_key, UserEntity.table_name)
-            is not None
+            self.repository_factory.get_repository(UserEntity).read(api_key) is not None
         )
 
 

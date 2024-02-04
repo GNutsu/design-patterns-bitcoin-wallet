@@ -6,6 +6,7 @@ from bitcoinwallet.core.repository.repository_factory import IRepositoryFactory
 from bitcoinwallet.core.service.exception import UserHasNoRightOnWalletException
 from bitcoinwallet.core.utils import ILogger
 from bitcoinwallet.infra.fastapi.model import Transaction
+from bitcoinwallet.core.model.exception import UserHasNoRightOnWalletException
 
 
 class IWalletService(ABC):
