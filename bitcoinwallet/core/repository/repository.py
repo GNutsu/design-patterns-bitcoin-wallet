@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from bitcoinwallet.core.repository.entity import Entity, NullEntity
+from bitcoinwallet.core.model.entity import Entity, NullEntity
 
 
 class IRepository(ABC):

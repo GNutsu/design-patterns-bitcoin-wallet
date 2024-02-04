@@ -4,7 +4,7 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from bitcoinwallet.core.utils import ConsoleLogger, ILogger
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 
 
 class IBitcoinRepository(ABC):

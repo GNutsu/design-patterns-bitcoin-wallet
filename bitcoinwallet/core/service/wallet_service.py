@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from bitcoinwallet.core.service.exception import UserHasNoRightOnWalletException
+from bitcoinwallet.core.model.exception import UserHasNoRightOnWalletException
 
 
 class IWalletService(ABC):
