@@ -1,11 +1,17 @@
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
+from typing import List
 
-from bitcoinwallet.core.model.exception.wallet_exception import WalletsLimitExceededException, WalletNotFoundException, \
-    NotEnoughBalanceException
-from bitcoinwallet.core.repository.entity import WalletEntity
+from bitcoinwallet.core.logger import ILogger
+from bitcoinwallet.core.model.entity import WalletEntity
+from bitcoinwallet.core.model.exception.wallet_exception import (
+    NotEnoughBalanceException,
+    WalletNotFoundException,
+    WalletsLimitExceededException,
+)
 from bitcoinwallet.core.repository.repository_factory import IRepositoryFactory
-from bitcoinwallet.core.utils import ILogger
 
 
 class IWalletService(ABC):
@@ -25,41 +31,52 @@ class IWalletService(ABC):
     def deposit(self, wallet_address: str, amount: int) -> None:
         pass
 
+
 @dataclass
 class WalletService(IWalletService):
     logger: ILogger
     repository_factory: IRepositoryFactory
 
     def create_wallet(self, user_api_key: str) -> str:
-        users_wallets = self.repository_factory.get_repository().get_wallets_by_user_api_key(user_api_key)
-        if users_wallets >= 3:
+        self.logger.info("Creating new wallet")
+        users_wallets = IRepositoryFactory.get_repository(WalletEntity).get_by_field("owner_api_key", user_api_key)
+        if len(users_wallets) >= 3:
             raise WalletsLimitExceededException(user_api_key)
+        wallet_entity = WalletEntity(id=str(uuid.uuid4()),
+                                     owner_api_key=user_api_key, balance=100000000,
+                                     creation_time=datetime.now().timestamp(),
+                                     address=str(uuid.uuid4()))
+        self.repository_factory.get_repository(wallet_entity.__class__).create(
+            wallet_entity
+        )
+        return wallet_entity.address
 
-        new_wallet = self.repository_factory.get_repository().create_wallet(user_api_key)
-        self.deposit(new_wallet.address, 100000000)
-        return new_wallet.address
-
-    def get_owner_api_key(self, address:str) -> str:
-        wallet = self.repository_factory.get_repository().get_wallet_by_address(address)
-        if wallet is None:
+    def get_owner_api_key(self, address: str) -> str:
+        wallets: List[WalletEntity] = self.repository_factory.get_repository(WalletEntity) \
+            .get_by_field("address", address)
+        if wallets is None or len(wallets) == 0:
             raise WalletNotFoundException(address)
-        return wallet.owner_api_key
+        return wallets[0].owner_api_key
 
     def withdraw(self, user_api_key: str, wallet_address: str, amount: int) -> None:
-        wallet: WalletEntity = self.repository_factory.get_repository().get_wallet_by_address(wallet_address)
-        if wallet.user_api_key != user_api_key:
-            raise UserHasNoRightOnWalletException(
-                api_key=user_api_key, wallet_address=wallet_address
-            )
-        if wallet.balance_satoshi < amount:
-            raise NotEnoughBalanceException(api_key=user_api_key)
-        wallet.set_balance(wallet.get_balance()-amount)
-        self.repository_factory.get_wallet_dao().save(wallet)
+        wallets: List[WalletEntity] = self.repository_factory.get_repository(WalletEntity) \
+            .get_by_field("address", wallet_address)
+        if wallets is None or len(wallets) == 0:
+            raise WalletNotFoundException(wallet_address)
+        wallet: WalletEntity = wallets[0]
+        if wallet.balance < amount:
+            raise NotEnoughBalanceException(wallet_address)
+        wallet.balance = wallet.balance - amount
+        self.repository_factory.get_repository(WalletEntity).update(wallet)
 
     def deposit(self, wallet_address: str, amount: int) -> None:
-        wallet: WalletEntity = self.repository_factory.get_repository().get_wallet_by_address(wallet_address)
-        wallet.set_balance(wallet.get_balance()+amount)
-        self.repository_factory.get_wallet_dao().save(wallet)
+        wallets: List[WalletEntity] = self.repository_factory.get_repository(WalletEntity) \
+            .get_by_field("address", wallet_address)
+        if wallets is None or len(wallets) == 0:
+            raise WalletNotFoundException(wallet_address)
+        wallet: WalletEntity = wallets[0]
+        wallet.balance = wallet.balance + amount
+        self.repository_factory.get_repository(WalletEntity).update(wallet)
 
 
 class NullWalletService(IWalletService):

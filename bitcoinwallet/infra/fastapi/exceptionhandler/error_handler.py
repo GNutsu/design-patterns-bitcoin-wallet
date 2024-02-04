@@ -3,7 +3,10 @@ from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from starlette.responses import Response
 
-from bitcoinwallet.core.model.exception.exception import ForbiddenException, NotFoundException
+from bitcoinwallet.core.model.exception.exception import (
+    ForbiddenException,
+    NotFoundException,
+)
 
 
 def not_found_exception_handler(request: Request, exc: NotFoundException) -> Response:

@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 
+import timestamp as timestamp
+
 
 @dataclass
 class Entity(ABC):
@@ -45,7 +47,8 @@ class WalletEntity(Entity):
     id: str
     owner_api_key: str
     balance: int
-    creation_time: datetime
+    creation_time: timestamp
+    address: str
 
     @staticmethod
     def get_table_name() -> str:

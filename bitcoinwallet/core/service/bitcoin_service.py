@@ -4,7 +4,6 @@ from configparser import ConfigParser
 from dataclasses import dataclass, field
 from typing import TypeVar
 
-from bitcoinwallet.core.model.exception.exception import UserNotFoundException
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 from bitcoinwallet.core.model.model import TransactionModel
 from bitcoinwallet.core.service.transaction_service import (
