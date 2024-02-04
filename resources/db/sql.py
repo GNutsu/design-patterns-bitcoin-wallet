@@ -1,8 +1,6 @@
 import os
 import sqlite3
 
-from definitions import DB_NAME
-
 
 def db_setup(db_path: str) -> str:
     if not os.path.exists(db_path):
@@ -14,7 +12,7 @@ def db_setup(db_path: str) -> str:
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS users (
-            api_key TEXT PRIMARY KEY,
+            api_key PRIMARY KEY,
             wallet_count
         )
     """
@@ -23,7 +21,7 @@ def db_setup(db_path: str) -> str:
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS wallets (
-            id TEXT PRIMARY KEY,
+            id PRIMARY KEY,
             owner_api_key,
             balance,
             creation_time,
@@ -35,7 +33,7 @@ def db_setup(db_path: str) -> str:
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS transactions (
-            id TEXT PRIMARY KEY,
+            id PRIMARY KEY,
             from_addr,
             to_addr,
             amount,
@@ -53,4 +51,4 @@ def db_setup(db_path: str) -> str:
     return db_path
 
 
-db_setup(DB_NAME)
+db_setup("bw_db.db")
