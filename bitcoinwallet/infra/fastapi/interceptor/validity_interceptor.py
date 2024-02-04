@@ -10,5 +10,4 @@ def verify_api_key(
 ) -> str:
     if not bitcoin_service.user_valid(api_key):
         raise UserNotFoundException(api_key=api_key)
-    raise UserNotFoundException(api_key=api_key)
     return api_key

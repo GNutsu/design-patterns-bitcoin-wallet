@@ -120,5 +120,11 @@ class BitcoinServiceBuilder:
         self.service.wallet_service = wallet_service
         return self
 
+    def set_transaction_service(
+        self: TBitcoinService, transaction_service: ITransactionService
+    ) -> TBitcoinService:
+        self.service.transaction_service = transaction_service
+        return self
+
     def build(self) -> BitcoinService:
         return self.service
