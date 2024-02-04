@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
 
 import timestamp as timestamp
 
@@ -66,7 +65,7 @@ class TransactionEntity(Entity):
     to_addr: str
     amount: int
     fee_cost: int
-    transaction_time: datetime
+    transaction_time: str
 
     @staticmethod
     def get_table_name() -> str:
