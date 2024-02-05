@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-import timestamp as timestamp
-
 
 @dataclass
 class Entity(ABC):
@@ -46,7 +44,7 @@ class WalletEntity(Entity):
     id: str
     owner_api_key: str
     balance: int
-    creation_time: timestamp
+    creation_time: str
     address: str
 
     @staticmethod
