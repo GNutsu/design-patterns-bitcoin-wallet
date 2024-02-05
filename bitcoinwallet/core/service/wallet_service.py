@@ -55,7 +55,7 @@ class WalletService(IWalletService):
                 "address", address
             ),
         )
-        if not wallets:
+        if wallets is None or len(wallets) == 0:
             self.logger.error(f"Wallet not found: {address}")
             raise WalletNotFoundException(address)
         return wallets[0]

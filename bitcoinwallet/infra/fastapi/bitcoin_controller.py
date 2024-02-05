@@ -23,6 +23,30 @@ def create_user(bitcoin_service: BitcoinServiceDependable) -> CreateUserResponse
 
 
 @bitcoin_api.post(
+    "/wallets", status_code=status.HTTP_201_CREATED, response_model=CreateWalletResponse
+)
+def create_wallet(
+    bitcoin_service: BitcoinServiceDependable, api_key: str = Depends(verify_api_key)
+) -> CreateWalletResponse:
+    wallet_address, balance_btc, balance_usd = bitcoin_service.create_wallet(api_key)
+    return CreateWalletResponse(
+        wallet_address=wallet_address,
+        balance_btc=balance_btc,
+        balance_usd=balance_usd,
+    )
+
+
+@bitcoin_api.get("/wallets/{address}", response_model=WalletBalanceResponse)
+def get_wallet_balance(
+    address: str,
+    bitcoin_service: BitcoinServiceDependable,
+    api_key: str = Depends(verify_api_key),
+) -> WalletBalanceResponse:
+    btc_balance, usd_balance = bitcoin_service.get_wallet_balance(api_key, address)
+    return WalletBalanceResponse(btc_balance=btc_balance, usd_balance=usd_balance)
+
+
+@bitcoin_api.post(
     "/transactions",
     status_code=status.HTTP_201_CREATED,
     response_model=CreateTransactionResponse,
@@ -50,27 +74,3 @@ def get_transactions(
 ) -> ListTransactionsResponse:
     transactions = bitcoin_service.get_transactions(api_key)
     return ListTransactionsResponse(transactions=transactions)
-
-
-@bitcoin_api.post(
-    "/wallets", status_code=status.HTTP_201_CREATED, response_model=CreateWalletResponse
-)
-def create_wallet(
-    bitcoin_service: BitcoinServiceDependable, api_key: str = Depends(verify_api_key)
-) -> CreateWalletResponse:
-    wallet_address, balance_btc, balance_usd = bitcoin_service.create_wallet(api_key)
-    return CreateWalletResponse(
-        wallet_address=wallet_address,
-        balance_btc=balance_btc,
-        balance_usd=balance_usd,
-    )
-
-
-@bitcoin_api.get("/wallets/{address}", response_model=WalletBalanceResponse)
-def get_wallet_balance(
-    address: str,
-    bitcoin_service: BitcoinServiceDependable,
-    api_key: str = Depends(verify_api_key),
-) -> WalletBalanceResponse:
-    btc_balance, usd_balance = bitcoin_service.get_wallet_balance(api_key, address)
-    return WalletBalanceResponse(btc_balance=btc_balance, usd_balance=usd_balance)
