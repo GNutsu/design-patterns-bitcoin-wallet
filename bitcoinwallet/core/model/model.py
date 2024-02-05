@@ -24,6 +24,11 @@ class TransactionModel(BaseModel):
     fee_price: int
 
 
+class CreateTransactionResponse(BaseModel):
+    transaction_id: str
+    transaction: TransactionModel
+
+
 class ListTransactionsResponse(BaseModel):
     transactions: list[TransactionModel]
 
