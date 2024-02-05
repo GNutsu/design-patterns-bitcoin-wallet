@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Tuple, TypeVar
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
-from bitcoinwallet.core.model.model import TransactionModel
+from bitcoinwallet.core.model.model import CreateTransactionResponse, TransactionModel
 from bitcoinwallet.core.service.currency_api_client import (
     ICurrencyApiClient,
     NullCurrencyApiClient,
@@ -33,7 +33,7 @@ class IBitcoinService(ABC):
         from_wallet_addr: str,
         to_wallet_addr: str,
         amount: int,
-    ) -> str:
+    ) -> CreateTransactionResponse:
         pass
 
     @abstractmethod
@@ -74,7 +74,7 @@ class BitcoinService(IBitcoinService):
         from_wallet_addr: str,
         to_wallet_addr: str,
         amount: int,
-    ) -> str:
+    ) -> CreateTransactionResponse:
         self.logger.info(
             f"Creating transaction user_api_key: {user_api_key}, "
             f"from_wallet_addr: {from_wallet_addr} "
@@ -97,14 +97,21 @@ class BitcoinService(IBitcoinService):
             wallet_address=from_wallet_addr,
             amount=amount_in_satoshi + fee_for_transaction,
         )
-        self.wallet_service.deposit(
-            wallet_address=to_wallet_addr, amount=amount_in_satoshi
+        self.wallet_service.deposit(wallet_address=to_wallet_addr, amount=amount_in_satoshi)
+        transaction_model = TransactionModel(
+            from_wallet_address=from_wallet_addr,
+            to_wallet_address=to_wallet_addr,
+            amount=amount,
+            fee_price=fee_for_transaction,
         )
-        return self.transaction_service.create_transaction(
+        transaction_id = self.transaction_service.create_transaction(
             from_addr=from_wallet_addr,
             to_addr=to_wallet_addr,
             amount=amount_in_satoshi,
             fee_cost=fee_for_transaction,
+        )
+        return CreateTransactionResponse(
+            transaction_id=transaction_id, transaction=transaction_model
         )
 
     def get_transactions(self, api_key: str) -> list[TransactionModel]:

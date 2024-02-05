@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 
 from bitcoinwallet.core.model.model import (
     CreateTransactionRequest,
+    CreateTransactionResponse,
     CreateUserResponse,
     CreateWalletResponse,
     ListTransactionsResponse,
@@ -21,12 +22,16 @@ def create_user(bitcoin_service: BitcoinServiceDependable) -> CreateUserResponse
     return CreateUserResponse(api_key=api_key)
 
 
-@bitcoin_api.post("/transactions", status_code=status.HTTP_201_CREATED)
+@bitcoin_api.post(
+    "/transactions",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CreateTransactionResponse,
+)
 def create_transaction(
     transaction_request: CreateTransactionRequest,
     bitcoin_service: BitcoinServiceDependable,
     api_key: str = Depends(verify_api_key),
-) -> str:
+) -> CreateTransactionResponse:
     return bitcoin_service.create_transaction(
         api_key,
         transaction_request.from_wallet_address,
