@@ -101,7 +101,7 @@ def test_wallet_repository(test_db_setup: str) -> None:
     wallets = wallet_repo.get_by_field("owner_api_key", api_key)
     assert len(wallets) == 2
 
-    wallet_repo.delete(another_wallet_addr)
+    wallet_repo.delete(another_wallet_id)
 
     wallets1 = wallet_repo.get_by_field("owner_api_key", api_key)
     assert len(wallets1) == 1
@@ -121,10 +121,10 @@ def test_transaction_repository(test_db_setup: str) -> None:
     user: UserEntity = UserEntity("7856", 1)
     user_repo.create(user)
     wallet1: WalletEntity = WalletEntity(
-        "6756", user.api_key, 1000000, datetime_now(), "qwerty"
+        "6756", user.api_key, 1000000, datetime_now(), "qwerty2"
     )
     wallet2: WalletEntity = WalletEntity(
-        "6757", user.api_key, 1000000, datetime_now(), "qwerty1"
+        "6757", user.api_key, 1000000, datetime_now(), "qwerty3"
     )
     wallet_repo.create(wallet1)
     wallet_repo.create(wallet2)
