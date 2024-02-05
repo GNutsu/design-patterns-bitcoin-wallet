@@ -2,6 +2,7 @@ import sqlite3
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional, Tuple, Type, TypeVar, Union
 
+from bitcoinwallet.core.logger import ILogger
 from bitcoinwallet.core.model.entity import Entity
 from bitcoinwallet.core.model.query import Logical, Operator
 
@@ -31,6 +32,8 @@ class IRepository(ABC):
 
 
 class Repository(IRepository):
+    logger: ILogger
+
     def __init__(self, entity_class: Type[T], db_path: str):
         self._entity_class = entity_class
         self._db_path = db_path

@@ -1,15 +1,21 @@
 from fastapi import FastAPI
 
-from bitcoinwallet.core.model.exception import ForbiddenException, NotFoundException
+from bitcoinwallet.core.model.exception.exception import (
+    ForbiddenException,
+    NotFoundException,
+)
 from bitcoinwallet.core.repository.repository_factory import RepositoryFactory
 from bitcoinwallet.core.service.bitcoin_service import BitcoinServiceBuilder
+from bitcoinwallet.core.service.currency_api_client import CurrencyApiClient
 from bitcoinwallet.core.service.transaction_service import TransactionServiceBuilder
 from bitcoinwallet.core.service.user_service import UserServiceBuilder
+from bitcoinwallet.core.service.wallet_service import WalletServiceBuilder
 from bitcoinwallet.infra.fastapi.bitcoin_controller import bitcoin_api
 from bitcoinwallet.infra.fastapi.exceptionhandler.error_handler import (
     forbidden_exception_handler,
     not_found_exception_handler,
 )
+from definitions import GECKO_CURRENCY_BASE_URL
 
 
 def init_app() -> FastAPI:
@@ -27,10 +33,18 @@ def init_app() -> FastAPI:
         TransactionServiceBuilder().set_repository_factory(repository_factory).build()
     )
 
+    wallet_service = (
+        WalletServiceBuilder().set_repository_factory(repository_factory).build()
+    )
+
+    currency_api_client = CurrencyApiClient(GECKO_CURRENCY_BASE_URL)
+
     bitcoin_service = (
         BitcoinServiceBuilder()
         .set_user_service(user_service)
         .set_transaction_service(transaction_service)
+        .set_wallet_service(wallet_service)
+        .set_currency_api_client(currency_api_client)
         .build()
     )
 

@@ -1,11 +1,14 @@
 import math
 from abc import ABC, abstractmethod
-from configparser import ConfigParser
-from dataclasses import dataclass, field
-from typing import TypeVar
+from dataclasses import dataclass
+from typing import Tuple, TypeVar
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 from bitcoinwallet.core.model.model import TransactionModel
+from bitcoinwallet.core.service.currency_api_client import (
+    ICurrencyApiClient,
+    NullCurrencyApiClient,
+)
 from bitcoinwallet.core.service.transaction_service import (
     ITransactionService,
     NullTransactionService,
@@ -40,6 +43,16 @@ class IBitcoinService(ABC):
     def user_valid(self, api_key: str) -> bool:
         pass
 
+    @abstractmethod
+    def get_wallet_balance(
+        self, api_key: str, wallet_address: str
+    ) -> Tuple[float, float]:
+        pass
+
+    @abstractmethod
+    def create_wallet(self, api_key: str) -> Tuple[str, float, float]:
+        pass
+
 
 @dataclass
 class BitcoinService(IBitcoinService):
@@ -47,7 +60,7 @@ class BitcoinService(IBitcoinService):
     wallet_service: IWalletService
     transaction_service: ITransactionService
     logger: ILogger
-    config: ConfigParser = field(init=False)
+    currency_api_client: ICurrencyApiClient
 
     def create_user(self) -> str:
         self.logger.info("Creating user")
@@ -66,8 +79,8 @@ class BitcoinService(IBitcoinService):
             f"from_wallet_addr: {from_wallet_addr} "
             f"to_wallet_addr: {to_wallet_addr}, amount: {amount}"
         )
-        first_owner = self.wallet_service.get_owner_api_key()
-        second_owner = self.wallet_service.get_owner_api_key()
+        first_owner = self.wallet_service.get_owner_api_key(address=from_wallet_addr)
+        second_owner = self.wallet_service.get_owner_api_key(address=to_wallet_addr)
         fee_for_transaction = 0
 
         if first_owner != second_owner:
@@ -94,6 +107,22 @@ class BitcoinService(IBitcoinService):
         self.logger.info(f"Checking user validity: {api_key}")
         return self.user_service.user_valid(api_key)
 
+    def get_wallet_balance(
+        self, api_key: str, wallet_address: str
+    ) -> Tuple[float, float]:
+        self.logger.info(f"Fetching balance for wallet: {wallet_address}")
+        btc_balance = self.wallet_service.get_wallet_balance(api_key, wallet_address)
+
+        btc_to_usd_rate = self.currency_api_client.get_btc_to_usd_rate()
+        usd_balance = btc_balance * btc_to_usd_rate
+        return btc_balance, usd_balance
+
+    def create_wallet(self, api_key: str) -> Tuple[str, float, float]:
+        self.logger.info(f"Creating wallet for user: {api_key}")
+        wallet_address = self.wallet_service.create_wallet(api_key)
+        btc_balance, usd_balance = self.get_wallet_balance(api_key, wallet_address)
+        return wallet_address, btc_balance, usd_balance
+
 
 class BitcoinServiceBuilder:
     def __init__(self) -> None:
@@ -102,6 +131,7 @@ class BitcoinServiceBuilder:
             user_service=NullUserService(),
             wallet_service=NullWalletService(),
             transaction_service=NullTransactionService(),
+            currency_api_client=NullCurrencyApiClient(),
         )
 
     def set_logger(self: TBitcoinService, logger: ILogger) -> TBitcoinService:
@@ -124,6 +154,12 @@ class BitcoinServiceBuilder:
         self: TBitcoinService, transaction_service: ITransactionService
     ) -> TBitcoinService:
         self.service.transaction_service = transaction_service
+        return self
+
+    def set_currency_api_client(
+        self: TBitcoinService, currency_api_client: ICurrencyApiClient
+    ) -> TBitcoinService:
+        self.service.currency_api_client = currency_api_client
         return self
 
     def build(self) -> BitcoinService:

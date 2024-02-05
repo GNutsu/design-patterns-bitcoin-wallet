@@ -6,3 +6,10 @@ DB_NAME = os.path.join(os.path.abspath(__file__), "..", "resources", "db", "bw_d
 TEST_DB_NAME = "test_db.db"
 
 FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+
+MAX_WALLETS_PER_USER = 3
+INITIAL_WALLET_BALANCE = 100000000
+
+GECKO_CURRENCY_BASE_URL = "https://api.coingecko.com/api/v3/simple/price"
+CACHE_TTL = 300
+CURRENCY_CACHE_MAX_SIZE = 1
