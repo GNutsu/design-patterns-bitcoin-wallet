@@ -1,6 +1,6 @@
 from fastapi import Header
 
-from bitcoinwallet.core.model.exception import UserNotFoundException
+from bitcoinwallet.core.model.exception.user_exception import UserNotFoundException
 from bitcoinwallet.infra.fastapi.dependables import BitcoinServiceDependable
 
 

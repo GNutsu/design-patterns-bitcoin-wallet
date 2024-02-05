@@ -28,6 +28,20 @@ class ListTransactionsResponse(BaseModel):
     transactions: list[TransactionModel]
 
 
+class WalletBalanceResponse(BaseModel):
+    btc_balance: float
+    usd_balance: float
+
+
+class TransactionResponse(BaseModel):
+    transaction_id: str
+    source_wallet_address: str
+    destination_wallet_address: str
+    amount: float
+    fee: float
+    timestamp: str
+
+
 class StatisticsResponse:
     transactions_num: int
     platform_profit: float
