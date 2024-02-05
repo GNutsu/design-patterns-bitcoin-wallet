@@ -25,6 +25,7 @@ def db_setup(db_path: str) -> str:
             owner_api_key,
             balance,
             creation_time,
+            address,
             FOREIGN KEY(owner_api_key) REFERENCES users(api_key)
         )
     """
