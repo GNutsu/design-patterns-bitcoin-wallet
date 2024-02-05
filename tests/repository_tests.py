@@ -71,20 +71,23 @@ def test_wallet_repository(test_db_setup: str) -> None:
 
     user_repo.create(UserEntity(api_key, wallet_count))
 
-    wallet_addr: str = "12345"
+    wallet_id: str = "12345"
+    wallet_addr: str = "qwerty"
     balance: int = 100000
     creation_time: str = datetime_now()
-    w: WalletEntity = WalletEntity(wallet_addr, api_key, balance, creation_time)
+    w: WalletEntity = WalletEntity(
+        wallet_id, api_key, balance, creation_time, wallet_addr
+    )
     wallet_repo.create(w)
 
-    wallet = wallet_repo.read(wallet_addr)
+    wallet = wallet_repo.read(wallet_id)
     assert wallet and wallet == w
 
     balance += 100000
     w.balance = balance
     wallet_repo.update(w)
 
-    wallet = wallet_repo.read(wallet_addr)
+    wallet = wallet_repo.read(wallet_id)
     assert wallet and wallet == w
 
     another_wallet_addr: str = "123456"

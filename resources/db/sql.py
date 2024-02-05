@@ -25,7 +25,7 @@ def db_setup(db_path: str) -> str:
             owner_api_key,
             balance,
             creation_time,
-            address,
+            address NOT NULL UNIQUE,
             FOREIGN KEY(owner_api_key) REFERENCES users(api_key)
         )
     """
@@ -40,8 +40,8 @@ def db_setup(db_path: str) -> str:
             amount,
             fee_cost,
             transaction_time,
-            FOREIGN KEY(from_addr) REFERENCES wallets(id),
-            FOREIGN KEY(to_addr) REFERENCES wallets(id)
+            FOREIGN KEY(from_addr) REFERENCES wallets(address),
+            FOREIGN KEY(to_addr) REFERENCES wallets(address)
         )
     """
     )
