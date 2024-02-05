@@ -1,6 +1,8 @@
 import os
 import sqlite3
 
+from definitions import DB_NAME
+
 
 def db_setup(db_path: str) -> str:
     if not os.path.exists(db_path):
@@ -52,4 +54,5 @@ def db_setup(db_path: str) -> str:
     return db_path
 
 
-db_setup("bw_db.db")
+print(DB_NAME)
+db_setup(DB_NAME)
