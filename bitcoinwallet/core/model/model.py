@@ -14,13 +14,13 @@ class CreateWalletResponse(BaseModel):
 class CreateTransactionRequest(BaseModel):
     from_wallet_address: str
     to_wallet_address: str
-    amount: int
+    amount: float
 
 
 class TransactionModel(BaseModel):
     from_wallet_address: str
     to_wallet_address: str
-    amount: int
+    amount: float
     fee_price: int
 
 

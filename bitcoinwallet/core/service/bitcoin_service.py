@@ -32,7 +32,7 @@ class IBitcoinService(ABC):
         user_api_key: str,
         from_wallet_addr: str,
         to_wallet_addr: str,
-        amount: int,
+        amount: float,
     ) -> CreateTransactionResponse:
         pass
 
@@ -73,7 +73,7 @@ class BitcoinService(IBitcoinService):
         user_api_key: str,
         from_wallet_addr: str,
         to_wallet_addr: str,
-        amount: int,
+        amount: float,
     ) -> CreateTransactionResponse:
         self.logger.info(
             f"Creating transaction user_api_key: {user_api_key}, "
@@ -97,7 +97,9 @@ class BitcoinService(IBitcoinService):
             wallet_address=from_wallet_addr,
             amount=amount_in_satoshi + fee_for_transaction,
         )
-        self.wallet_service.deposit(wallet_address=to_wallet_addr, amount=amount_in_satoshi)
+        self.wallet_service.deposit(
+            wallet_address=to_wallet_addr, amount=amount_in_satoshi
+        )
         transaction_model = TransactionModel(
             from_wallet_address=from_wallet_addr,
             to_wallet_address=to_wallet_addr,
