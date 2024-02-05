@@ -1,4 +1,5 @@
 import os
+import uuid
 from typing import Generator
 
 import pytest
@@ -26,7 +27,7 @@ def test_user_repository(setup_test_db: str) -> None:
         UserEntity
     )
 
-    api_key: str = "123123"
+    api_key: str = str(uuid.uuid4())
     wallet_count: int = 0
     u: UserEntity = UserEntity(api_key, wallet_count)
     user_repo.create(u)
@@ -41,7 +42,7 @@ def test_user_repository(setup_test_db: str) -> None:
     user = user_repo.read(api_key)
     assert user and user == u
 
-    another_api_key: str = "1234"
+    another_api_key: str = str(uuid.uuid4())
     user_repo.create(UserEntity(another_api_key, wallet_count))
 
     users = user_repo.get_by_field("wallet_count", wallet_count)
@@ -60,13 +61,13 @@ def test_wallet_repository(setup_test_db: str) -> None:
         WalletEntity
     )
 
-    api_key: str = "123"
+    api_key: str = str(uuid.uuid4())
     wallet_count: int = 0
 
     user_repo.create(UserEntity(api_key, wallet_count))
 
-    wallet_id: str = "12345"
-    wallet_addr: str = "qwerty"
+    wallet_id: str = str(uuid.uuid4())
+    wallet_addr: str = str(uuid.uuid4())
     balance: int = 100000
     creation_time: str = datetime_now()
     w: WalletEntity = WalletEntity(
@@ -84,8 +85,8 @@ def test_wallet_repository(setup_test_db: str) -> None:
     wallet = wallet_repo.read(wallet_id)
     assert wallet and wallet == w
 
-    another_wallet_id: str = "123456"
-    another_wallet_addr: str = "qwerty1"
+    another_wallet_id: str = str(uuid.uuid4())
+    another_wallet_addr: str = str(uuid.uuid4())
     wallet_repo.create(
         WalletEntity(
             another_wallet_id, api_key, balance, datetime_now(), another_wallet_addr
@@ -112,18 +113,18 @@ def test_transaction_repository(setup_test_db: str) -> None:
         TransactionEntity
     )
 
-    user: UserEntity = UserEntity("7856", 1)
+    user: UserEntity = UserEntity(str(uuid.uuid4()), 1)
     user_repo.create(user)
     wallet1: WalletEntity = WalletEntity(
-        "6756", user.api_key, 1000000, datetime_now(), "qwerty2"
+        str(uuid.uuid4()), user.api_key, 1000000, datetime_now(), str(uuid.uuid4())
     )
     wallet2: WalletEntity = WalletEntity(
-        "6757", user.api_key, 1000000, datetime_now(), "qwerty3"
+        str(uuid.uuid4()), user.api_key, 1000000, datetime_now(), str(uuid.uuid4())
     )
     wallet_repo.create(wallet1)
     wallet_repo.create(wallet2)
 
-    tr1_id: str = "2346756"
+    tr1_id: str = str(uuid.uuid4())
     amount1: int = 10000
     fee1: int = 10
     time1: str = datetime_now()
@@ -142,7 +143,7 @@ def test_transaction_repository(setup_test_db: str) -> None:
     tr1 = transaction_repo.read(tr1_id)
     assert tr1 and tr1 == t1
 
-    tr2_id = "856554554"
+    tr2_id = str(uuid.uuid4())
     transaction_repo.create(
         TransactionEntity(tr2_id, wallet1.id, wallet2.id, amount1, fee1, datetime_now())
     )
