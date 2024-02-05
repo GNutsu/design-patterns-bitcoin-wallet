@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import List, TypeVar
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
+from bitcoinwallet.core.model.exception import UserHasNoRightOnWalletException
 from bitcoinwallet.core.model.model import TransactionModel
 from bitcoinwallet.core.service.transaction_service import (
     ITransactionService,
@@ -35,7 +36,7 @@ class IBitcoinService(ABC):
     @abstractmethod
     def get_addr_transactions(
         self, user_api_key: str, address: str
-    ) -> List[Transaction]:
+    ) -> List[TransactionModel]:
         pass
 
     @abstractmethod
@@ -44,6 +45,10 @@ class IBitcoinService(ABC):
 
     @abstractmethod
     def user_valid(self, api_key: str) -> bool:
+        pass
+
+    @abstractmethod
+    def get_statistics(self, admin_api_key) -> (int, float):
         pass
 
 
@@ -62,12 +67,12 @@ class BitcoinService(IBitcoinService):
 
     def get_addr_transactions(
         self, user_api_key: str, address: str
-    ) -> List[Transaction]:
+    ) -> List[TransactionModel]:
         self.logger.info(
             f"Getting transactions for user_api_key:"
             f" {user_api_key} from_wallet_addr: {address}"
         )
-        if self.wallet_service.hasUerWallet(user_api_key, address) is None:
+        if self.wallet_service.has_uer_wallet(user_api_key, address):
             raise UserHasNoRightOnWalletException(
                 api_key=user_api_key, wallet_address=address
             )
@@ -116,6 +121,10 @@ class BitcoinService(IBitcoinService):
         self.logger.info(f"Checking user validity: {api_key}")
         return self.user_service.user_valid(api_key)
 
+    def get_statistics(self, admin_api_key) -> (int, float):
+        # check admin_api_key
+        return self.transaction_service.get_statistics()
+
 
 class BitcoinServiceBuilder:
     def __init__(self) -> None:
@@ -150,3 +159,6 @@ class BitcoinServiceBuilder:
 
     def build(self) -> BitcoinService:
         return self.service
+
+    def get_statistics(self, admin_api_key) -> (int, float):
+        return 0, 0.0

@@ -27,6 +27,14 @@ class IRepository(ABC):
     def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         pass
 
+    def query_with_builder(
+        self,
+        conditions: List[Union[Tuple[str, Operator, Any], Logical]],
+        order_by: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> List[Entity]:
+        pass
+
 
 class Repository(IRepository):
     def __init__(self, entity_class: Type[Entity], db_path: str):

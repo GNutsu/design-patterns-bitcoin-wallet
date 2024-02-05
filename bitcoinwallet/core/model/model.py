@@ -26,3 +26,8 @@ class TransactionModel(BaseModel):
 
 class ListTransactionsResponse(BaseModel):
     transactions: list[TransactionModel]
+
+
+class StatisticsResponse:
+    transactions_num: int
+    platform_profit: float
