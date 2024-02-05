@@ -90,9 +90,12 @@ def test_wallet_repository(test_db_setup: str) -> None:
     wallet = wallet_repo.read(wallet_id)
     assert wallet and wallet == w
 
-    another_wallet_addr: str = "123456"
+    another_wallet_id: str = "123456"
+    another_wallet_addr: str = "qwerty1"
     wallet_repo.create(
-        WalletEntity(another_wallet_addr, api_key, balance, datetime_now())
+        WalletEntity(
+            another_wallet_id, api_key, balance, datetime_now(), another_wallet_addr
+        )
     )
 
     wallets = wallet_repo.get_by_field("owner_api_key", api_key)
@@ -117,8 +120,12 @@ def test_transaction_repository(test_db_setup: str) -> None:
 
     user: UserEntity = UserEntity("7856", 1)
     user_repo.create(user)
-    wallet1: WalletEntity = WalletEntity("6756", user.api_key, 1000000, datetime_now())
-    wallet2: WalletEntity = WalletEntity("6757", user.api_key, 1000000, datetime_now())
+    wallet1: WalletEntity = WalletEntity(
+        "6756", user.api_key, 1000000, datetime_now(), "qwerty"
+    )
+    wallet2: WalletEntity = WalletEntity(
+        "6757", user.api_key, 1000000, datetime_now(), "qwerty1"
+    )
     wallet_repo.create(wallet1)
     wallet_repo.create(wallet2)
 
