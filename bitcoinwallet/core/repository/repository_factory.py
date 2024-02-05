@@ -7,7 +7,7 @@ from bitcoinwallet.core.repository.repository import (
     NullRepository,
     Repository,
 )
-from definitions import DB_NAME
+from definitions import DB_NAME, TEST_DB_NAME
 
 
 class IRepositoryFactory(ABC):

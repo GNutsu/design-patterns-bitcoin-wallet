@@ -5,20 +5,14 @@ import pytest
 
 from bitcoinwallet.core.model.entity import TransactionEntity, UserEntity, WalletEntity
 from bitcoinwallet.core.repository.repository import IRepository
-from bitcoinwallet.core.repository.repository_factory import RepositoryFactory
 from bitcoinwallet.core.util import datetime_now
 from definitions import TEST_DB_NAME
 from resources.db.sql import db_setup
-
-
-class TestRepositoryFactory(RepositoryFactory):
-    @staticmethod
-    def get_db_path() -> str:
-        return TEST_DB_NAME
+from tests.test_repository_factory import TestRepositoryFactory
 
 
 @pytest.fixture(scope="session")
-def test_db_setup() -> Generator[None, None, None]:
+def setup_test_db() -> Generator[None, None, None]:
     db_setup(TEST_DB_NAME)
 
     yield
@@ -27,7 +21,7 @@ def test_db_setup() -> Generator[None, None, None]:
         os.remove(TEST_DB_NAME)
 
 
-def test_user_repository(test_db_setup: str) -> None:
+def test_user_repository(setup_test_db: str) -> None:
     user_repo: IRepository = TestRepositoryFactory.get_instance().get_repository(
         UserEntity
     )
@@ -58,7 +52,7 @@ def test_user_repository(test_db_setup: str) -> None:
     assert len(users1) == 1
 
 
-def test_wallet_repository(test_db_setup: str) -> None:
+def test_wallet_repository(setup_test_db: str) -> None:
     user_repo: IRepository = TestRepositoryFactory.get_instance().get_repository(
         UserEntity
     )
@@ -107,7 +101,7 @@ def test_wallet_repository(test_db_setup: str) -> None:
     assert len(wallets1) == 1
 
 
-def test_transaction_repository(test_db_setup: str) -> None:
+def test_transaction_repository(setup_test_db: str) -> None:
     user_repo: IRepository = TestRepositoryFactory.get_instance().get_repository(
         UserEntity
     )
