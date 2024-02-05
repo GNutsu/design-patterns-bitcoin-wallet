@@ -24,7 +24,7 @@ def test_create_transaction(client: TestClient) -> None:
     response = client.post("/wallets", headers=headers)
     to_wallet_address = response.json()["wallet_address"]
 
-    amount = 1000
+    amount = 0.2
 
     request = {
         "from_wallet_address": from_wallet_address,
@@ -55,7 +55,7 @@ def test_transaction_effect(client: TestClient) -> None:
     to_wallet_address = response.json()["wallet_address"]
     to_wallet_balance = response.json()["balance_btc"]
 
-    amount = 1000
+    amount = 0.3
 
     request = {
         "from_wallet_address": from_wallet_address,
@@ -95,7 +95,7 @@ def test_fee_transaction(client: TestClient) -> None:
     response = client.post("/wallets", headers=headers_two)
     to_wallet_address = response.json()["wallet_address"]
 
-    amount = 1000
+    amount = 0.2
 
     request = {
         "from_wallet_address": from_wallet_address,
