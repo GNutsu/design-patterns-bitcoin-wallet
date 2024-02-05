@@ -1,19 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeVar
 
 import requests
 from cachetools import TTLCache, cached
 
-from bitcoinwallet.core.logger import ILogger
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 from definitions import CACHE_TTL, CURRENCY_CACHE_MAX_SIZE, GECKO_CURRENCY_BASE_URL
-
-from bitcoinwallet.core.logger import ILogger, ConsoleLogger
-from typing import TypeVar
 
 # Cache
 cache: TTLCache[Any, float] = TTLCache(maxsize=CURRENCY_CACHE_MAX_SIZE, ttl=CACHE_TTL)
 TCurrencyApiClient = TypeVar("TCurrencyApiClient", bound="CurrencyApiClient")
-
 
 
 class ICurrencyApiClient(ABC):
@@ -23,7 +19,11 @@ class ICurrencyApiClient(ABC):
 
 
 class CurrencyApiClient(ICurrencyApiClient):
-    def __init__(self, url: str = GECKO_CURRENCY_BASE_URL, logger: ILogger = ConsoleLogger(TCurrencyApiClient)) -> None:
+    def __init__(
+        self,
+        url: str = GECKO_CURRENCY_BASE_URL,
+        logger: ILogger = ConsoleLogger("CurrencyApiClient"),
+    ) -> None:
         self.base_url = url
         self.logger = logger
 
