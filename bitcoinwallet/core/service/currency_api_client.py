@@ -7,8 +7,13 @@ from cachetools import TTLCache, cached
 from bitcoinwallet.core.logger import ILogger
 from definitions import CACHE_TTL, CURRENCY_CACHE_MAX_SIZE, GECKO_CURRENCY_BASE_URL
 
+from bitcoinwallet.core.logger import ILogger, ConsoleLogger
+from typing import TypeVar
+
 # Cache
 cache: TTLCache[Any, float] = TTLCache(maxsize=CURRENCY_CACHE_MAX_SIZE, ttl=CACHE_TTL)
+TCurrencyApiClient = TypeVar("TCurrencyApiClient", bound="CurrencyApiClient")
+
 
 
 class ICurrencyApiClient(ABC):
@@ -18,10 +23,9 @@ class ICurrencyApiClient(ABC):
 
 
 class CurrencyApiClient(ICurrencyApiClient):
-    logger: ILogger
-
-    def __init__(self, url: str = GECKO_CURRENCY_BASE_URL) -> None:
+    def __init__(self, url: str = GECKO_CURRENCY_BASE_URL, logger: ILogger = ConsoleLogger(TCurrencyApiClient)) -> None:
         self.base_url = url
+        self.logger = logger
 
     @cached(cache)
     def get_btc_to_usd_rate(self) -> float:
