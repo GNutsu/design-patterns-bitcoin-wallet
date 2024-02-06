@@ -1,7 +1,7 @@
 from fastapi import Header
 
 from bitcoinwallet.core.model.exception.user_exception import (
-    AdminNotFoundException,
+    UserHasNoRightsException,
     UserNotFoundException,
 )
 from bitcoinwallet.infra.fastapi.dependables import BitcoinServiceDependable
@@ -21,5 +21,5 @@ def verify_admin_api_key(
     admin_api_key: str = Header(..., alias="X-ADMIN-API-KEY"),
 ) -> str:
     if not bitcoin_service.admin_valid(admin_api_key):
-        raise AdminNotFoundException(api_key=admin_api_key)
+        raise UserHasNoRightsException(api_key=admin_api_key)
     return admin_api_key
