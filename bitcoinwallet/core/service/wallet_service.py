@@ -39,6 +39,10 @@ class IWalletService(ABC):
         pass
 
     @abstractmethod
+    def has_uer_wallet(self, user_api_key: str, address: str) -> bool:
+        pass
+
+    @abstractmethod
     def get_wallet_balance(self, api_key: str, wallet_address: str) -> int:
         pass
 
@@ -115,6 +119,17 @@ class WalletService(IWalletService):
             raise UserHasNoRightOnWalletException(api_key)
         return wallet.balance
 
+    def has_uer_wallet(self, api_key: str, address: str) -> bool:
+        self.logger.info("Checking if user has wallet with address")
+        wallets = self.repository_factory.get_repository(WalletEntity).get_by_field(
+            "owner_api_key", api_key
+        )
+        for wallet in wallets:
+            addr = cast(WalletEntity, wallet).address
+            if addr == address:
+                return True
+        return False
+
 
 class NullWalletService(IWalletService):
     def create_wallet(self, api_key: str) -> str:
@@ -131,6 +146,9 @@ class NullWalletService(IWalletService):
 
     def get_wallet_balance(self, api_key: str, wallet_address: str) -> int:
         return 0
+
+    def has_uer_wallet(self, user_api_key: str, address: str) -> bool:
+        return False
 
 
 class WalletServiceBuilder:
@@ -154,3 +172,6 @@ class WalletServiceBuilder:
 
     def build(self) -> WalletService:
         return self.service
+
+    def has_uer_wallet(self, user_api_key: str, address: str) -> bool:
+        return False

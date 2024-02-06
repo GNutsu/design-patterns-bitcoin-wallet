@@ -45,3 +45,8 @@ class TransactionResponse(BaseModel):
     amount: float
     fee: float
     timestamp: str
+
+
+class StatisticsResponse(BaseModel):
+    transactions_num: int
+    platform_profit: float

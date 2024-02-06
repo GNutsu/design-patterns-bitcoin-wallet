@@ -6,10 +6,14 @@ from bitcoinwallet.core.model.model import (
     CreateUserResponse,
     CreateWalletResponse,
     ListTransactionsResponse,
+    StatisticsResponse,
     WalletBalanceResponse,
 )
 from bitcoinwallet.infra.fastapi.dependables import BitcoinServiceDependable
-from bitcoinwallet.infra.fastapi.interceptor.validity_interceptor import verify_api_key
+from bitcoinwallet.infra.fastapi.interceptor.validity_interceptor import (
+    verify_admin_api_key,
+    verify_api_key,
+)
 
 bitcoin_api = APIRouter(tags=["Bitcoin"])
 
@@ -74,3 +78,33 @@ def get_transactions(
 ) -> ListTransactionsResponse:
     transactions = bitcoin_service.get_transactions(api_key)
     return ListTransactionsResponse(transactions=transactions)
+
+
+@bitcoin_api.get(
+    "/wallets/{address}/transactions",
+    status_code=status.HTTP_200_OK,
+    response_model=ListTransactionsResponse,
+)
+def get_addr_transactions(
+    address: str,
+    bitcoin_service: BitcoinServiceDependable,
+    user_api_key: str = Depends(verify_api_key),
+) -> ListTransactionsResponse:
+    transactions = bitcoin_service.get_addr_transactions(user_api_key, address)
+    return ListTransactionsResponse(transactions=transactions)
+
+
+@bitcoin_api.get(
+    "/statistics",
+    status_code=status.HTTP_200_OK,
+    response_model=StatisticsResponse,
+)
+def get_statistics(
+    bitcoin_service: BitcoinServiceDependable,
+    admin_api_key: str = Depends(verify_admin_api_key),
+) -> StatisticsResponse:
+    statistic = bitcoin_service.get_statistics(admin_api_key)
+
+    return StatisticsResponse(
+        transactions_num=statistic[0], platform_profit=statistic[1]
+    )

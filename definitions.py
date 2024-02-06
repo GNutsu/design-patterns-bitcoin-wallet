@@ -17,3 +17,5 @@ GECKO_CURRENCY_BASE_URL = "https://api.coingecko.com/api/v3/simple/price"
 INITIAL_USD_RATE = 42646.20
 CACHE_TTL = 300
 CURRENCY_CACHE_MAX_SIZE = 1
+
+ADMIN_API_KEY = "admin"
