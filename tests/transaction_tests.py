@@ -17,6 +17,8 @@ def client() -> Generator[TestClient, None, None]:
 
     yield TestClient(init_app(TestRepositoryFactory.get_instance()))
 
+    TestRepositoryFactory.get_instance().close_connections()
+
     if os.path.exists(TEST_DB_NAME):
         os.remove(TEST_DB_NAME)
 

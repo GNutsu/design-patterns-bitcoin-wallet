@@ -17,6 +17,7 @@ def setup_test_db() -> Generator[None, None, None]:
     db_setup(TEST_DB_NAME)
 
     yield
+    TestRepositoryFactory.get_instance().close_connections()
 
     if os.path.exists(TEST_DB_NAME):
         os.remove(TEST_DB_NAME)

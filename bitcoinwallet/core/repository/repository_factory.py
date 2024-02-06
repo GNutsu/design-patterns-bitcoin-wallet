@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Type
+from typing import Dict, Type, TypeVar
 
 from bitcoinwallet.core.model.entity import Entity
 from bitcoinwallet.core.repository.repository import (
@@ -8,6 +8,8 @@ from bitcoinwallet.core.repository.repository import (
     Repository,
 )
 from definitions import DB_NAME
+
+TRepositoryFactory = TypeVar("TRepositoryFactory", bound="RepositoryFactory")
 
 
 class IRepositoryFactory(ABC):
@@ -37,7 +39,7 @@ class RepositoryFactory(IRepositoryFactory):
         return DB_NAME
 
     @classmethod
-    def get_instance(cls) -> "IRepositoryFactory":
+    def get_instance(cls) -> "RepositoryFactory":
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
