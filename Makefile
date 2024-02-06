@@ -8,14 +8,14 @@ install: ## Install requirements
 	python -m pip install -r requirements.txt
 
 format: ## Run code formatters
-	python3 -m isort .
-	python3 -m black .
+	python -m isort .
+	python -m black .
 
 lint: ## Run code linters
-	python3 -m isort --check .
-	python3 -m black --check .
-	python3 -m flake8 bitcoinwallet tests
-	python3 -m mypy bitcoinwallet tests
+	python -m isort --check .
+	python -m black --check .
+	python -m flake8 bitcoinwallet tests
+	python -m mypy bitcoinwallet tests
 
 test:  ## Run tests with coverage
-	python3 -m pytest --cov
+	python -m pytest --cov

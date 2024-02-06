@@ -75,7 +75,6 @@ class TransactionService(ITransactionService):
     def get_addr_transactions(
         self, api_key: str, address: str
     ) -> list[TransactionModel]:
-
         transactions = self.repository_factory.get_repository(
             TransactionEntity
         ).query_with_builder(
