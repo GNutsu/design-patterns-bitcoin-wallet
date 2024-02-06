@@ -1,4 +1,7 @@
-from bitcoinwallet.core.model.exception.exception import NotFoundException
+from bitcoinwallet.core.model.exception.exception import (
+    ForbiddenException,
+    NotFoundException,
+)
 
 
 class UserNotFoundException(NotFoundException):
@@ -9,7 +12,7 @@ class UserNotFoundException(NotFoundException):
         return self.msg
 
 
-class AdminNotFoundException(NotFoundException):
+class UserHasNoRightsException(ForbiddenException):
     def __init__(self, api_key: str) -> None:
         self.msg: str = "Admin with api_key: " + api_key + " doesn't exist"
 
