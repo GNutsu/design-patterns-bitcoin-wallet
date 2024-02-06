@@ -11,7 +11,7 @@ from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
-from bitcoinwallet.core.util import datetime_now
+from bitcoinwallet.core.util import CurrencyExchangeUtil, datetime_now
 
 TTransactionService = TypeVar("TTransactionService", bound="TransactionServiceBuilder")
 
@@ -66,7 +66,7 @@ class TransactionService(ITransactionService):
         return TransactionModel(
             from_wallet_address=transaction_entity.from_addr,
             to_wallet_address=transaction_entity.to_addr,
-            amount=transaction_entity.amount,
+            amount=CurrencyExchangeUtil.satoshi_to_bitcoin(transaction_entity.amount),
             fee_price=transaction_entity.fee_cost,
         )
 
@@ -116,7 +116,12 @@ class TransactionService(ITransactionService):
         )
 
         transactions_num = len(all_transactions)
-        platform_profit = sum(transaction.fee_cost for transaction in all_transactions)
+        platform_profit_in_satoshi = sum(
+            transaction.fee_cost for transaction in all_transactions
+        )
+        platform_profit = CurrencyExchangeUtil.satoshi_to_bitcoin(
+            platform_profit_in_satoshi
+        )
         return transactions_num, platform_profit
 
 

@@ -7,7 +7,6 @@ from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 from bitcoinwallet.core.model.exception.wallet_exception import (
     UserHasNoRightOnWalletException,
 )
-from bitcoinwallet.core.model.model import TransactionModel
 from bitcoinwallet.core.model.model import CreateTransactionResponse, TransactionModel
 from bitcoinwallet.core.service.currency_api_client import (
     ICurrencyApiClient,
