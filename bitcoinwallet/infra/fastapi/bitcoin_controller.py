@@ -26,12 +26,16 @@ def create_user(bitcoin_service: BitcoinServiceDependable) -> CreateUserResponse
     return CreateUserResponse(api_key=api_key)
 
 
-@bitcoin_api.post("/transactions", status_code=status.HTTP_201_CREATED)
+@bitcoin_api.post(
+    "/transactions",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CreateTransactionResponse,
+)
 def create_transaction(
     transaction_request: CreateTransactionRequest,
     bitcoin_service: BitcoinServiceDependable,
     api_key: str = Depends(verify_api_key),
-) -> str:
+) -> CreateTransactionResponse:
     return bitcoin_service.create_transaction(
         api_key,
         transaction_request.from_wallet_address,
@@ -51,18 +55,6 @@ def get_addr_transactions(
     user_api_key: str = Depends(verify_api_key),
 ) -> ListTransactionsResponse:
     transactions = bitcoin_service.get_addr_transactions(user_api_key, address)
-    return ListTransactionsResponse(transactions=transactions)
-
-
-@bitcoin_api.get(
-    "/transactions",
-    status_code=status.HTTP_200_OK,
-    response_model=ListTransactionsResponse,
-)
-def get_transactions(
-    bitcoin_service: BitcoinServiceDependable, api_key: str = Depends(verify_api_key)
-) -> ListTransactionsResponse:
-    transactions = bitcoin_service.get_transactions(api_key)
     return ListTransactionsResponse(transactions=transactions)
 
 
@@ -104,24 +96,6 @@ def get_wallet_balance(
 ) -> WalletBalanceResponse:
     btc_balance, usd_balance = bitcoin_service.get_wallet_balance(api_key, address)
     return WalletBalanceResponse(btc_balance=btc_balance, usd_balance=usd_balance)
-
-
-@bitcoin_api.post(
-    "/transactions",
-    status_code=status.HTTP_201_CREATED,
-    response_model=CreateTransactionResponse,
-)
-def create_transaction(
-    transaction_request: CreateTransactionRequest,
-    bitcoin_service: BitcoinServiceDependable,
-    api_key: str = Depends(verify_api_key),
-) -> CreateTransactionResponse:
-    return bitcoin_service.create_transaction(
-        api_key,
-        transaction_request.from_wallet_address,
-        transaction_request.to_wallet_address,
-        transaction_request.amount,
-    )
 
 
 @bitcoin_api.get(

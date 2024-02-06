@@ -68,7 +68,7 @@ class IBitcoinService(ABC):
         pass
 
     @abstractmethod
-    def get_statistics(self, admin_api_key) -> tuple[int, float]:
+    def get_statistics(self, admin_api_key: str) -> tuple[int, float]:
         pass
 
 
@@ -93,9 +93,7 @@ class BitcoinService(IBitcoinService):
             f" {user_api_key} from_wallet_addr: {address}"
         )
         if not self.wallet_service.has_uer_wallet(user_api_key, address):
-            raise UserHasNoRightOnWalletException(
-                api_key=user_api_key, wallet_address=address
-            )
+            raise UserHasNoRightOnWalletException(user_api_key=user_api_key)
         transactions_list = self.transaction_service.get_addr_transactions(
             user_api_key, address
         )
@@ -181,8 +179,7 @@ class BitcoinService(IBitcoinService):
         btc_balance, usd_balance = self.get_wallet_balance(api_key, wallet_address)
         return wallet_address, btc_balance, usd_balance
 
-    def get_statistics(self, admin_api_key) -> tuple[int, float]:
-        # check admin_api_key
+    def get_statistics(self, admin_api_key: str) -> tuple[int, float]:
         return self.transaction_service.get_statistics(admin_api_key)
 
 

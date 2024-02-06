@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, TypeVar
+from typing import List, TypeVar, cast
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 from bitcoinwallet.core.model.entity import TransactionEntity, WalletEntity
@@ -28,11 +28,13 @@ class ITransactionService(ABC):
         pass
 
     @abstractmethod
-    def get_addr_transactions(self, user_api_key, address) -> list[TransactionModel]:
+    def get_addr_transactions(
+        self, user_api_key: str, address: str
+    ) -> list[TransactionModel]:
         pass
 
     @abstractmethod
-    def get_statistics(self, admin_api_key) -> tuple[int, float]:
+    def get_statistics(self, admin_api_key: str) -> tuple[int, float]:
         pass
 
 
@@ -73,34 +75,33 @@ class TransactionService(ITransactionService):
     def get_addr_transactions(
         self, api_key: str, address: str
     ) -> list[TransactionModel]:
-        conditions = [
-            ("to_addr", Operator.EQUALS, address),
-            Logical.OR,
-            ("from_addr", Operator.EQUALS, address),
-        ]
-        transactions: List[TransactionEntity] = self.repository_factory.get_repository(
+
+        transactions = self.repository_factory.get_repository(
             TransactionEntity
-        ).query_with_builder(conditions)
+        ).query_with_builder(
+            [
+                ("to_addr", Operator.EQUALS, address),
+                Logical.OR,
+                ("from_addr", Operator.EQUALS, address),
+            ]
+        )
 
         transactions_models = [
-            self.map_transaction_entity_to_model(transaction)
+            self.map_transaction_entity_to_model(cast(TransactionEntity, transaction))
             for transaction in transactions
         ]
         return transactions_models
 
     def get_transactions(self, api_key: str) -> list[TransactionModel]:
         self.logger.info(f"Collecting transactions for api_key: {api_key}")
-        conditions = [
-            ("owner_api_key", Operator.EQUALS, api_key),
-        ]
-        wallets: List[WalletEntity] = self.repository_factory.get_repository(
+        wallets = self.repository_factory.get_repository(
             WalletEntity
-        ).query_with_builder(conditions)
+        ).query_with_builder([("owner_api_key", Operator.EQUALS, api_key)])
 
         transaction_models: List[TransactionModel] = []
 
         for wallet in wallets:
-            wallet_address = wallet.address
+            wallet_address = cast(WalletEntity, wallet).address
             transactions_for_wallet = self.get_addr_transactions(
                 api_key, wallet_address
             )
@@ -108,16 +109,15 @@ class TransactionService(ITransactionService):
 
         return transaction_models
 
-    def get_statistics(self, admin_api_key) -> tuple[int, float]:
-        all_transactions: List[TransactionEntity] = (
-            self.repository_factory.get_repository(
-                TransactionEntity
-            ).query_with_builder([])
-        )
+    def get_statistics(self, admin_api_key: str) -> tuple[int, float]:
+        all_transactions = self.repository_factory.get_repository(
+            TransactionEntity
+        ).query_with_builder([])
 
         transactions_num = len(all_transactions)
         platform_profit_in_satoshi = sum(
-            transaction.fee_cost for transaction in all_transactions
+            cast(TransactionEntity, transaction).fee_cost
+            for transaction in all_transactions
         )
         platform_profit = CurrencyExchangeUtil.satoshi_to_bitcoin(
             platform_profit_in_satoshi
@@ -160,5 +160,5 @@ class NullTransactionService(ITransactionService):
     ) -> list[TransactionModel]:
         return []
 
-    def get_statistics(self, admin_api_key) -> tuple[int, float]:
+    def get_statistics(self, admin_api_key: str) -> tuple[int, float]:
         return 0, 0.0

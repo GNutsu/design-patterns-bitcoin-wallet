@@ -36,7 +36,7 @@ class IRepository(ABC):
         order_by: Optional[str] = None,
         limit: Optional[int] = None,
     ) -> List[Entity]:
-        pass
+        return []
 
 
 class Repository(IRepository):
