@@ -1,8 +1,6 @@
 import os
 import sqlite3
 
-from definitions import DB_NAME
-
 
 def db_setup(db_path: str) -> str:
     if not os.path.exists(db_path):
