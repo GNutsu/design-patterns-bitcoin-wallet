@@ -52,7 +52,3 @@ def db_setup(db_path: str) -> str:
     conn.close()
 
     return db_path
-
-
-print(DB_NAME)
-db_setup(DB_NAME)
