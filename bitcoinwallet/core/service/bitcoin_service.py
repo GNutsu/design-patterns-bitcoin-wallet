@@ -1,13 +1,12 @@
 import math
 from abc import ABC, abstractmethod
-from configparser import ConfigParser
-from dataclasses import dataclass, field
-from typing import List, TypeVar
 from dataclasses import dataclass
-from typing import Tuple, TypeVar
+from typing import List, Tuple, TypeVar
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
-from bitcoinwallet.core.model.exception import UserHasNoRightOnWalletException
+from bitcoinwallet.core.model.exception.wallet_exception import (
+    UserHasNoRightOnWalletException,
+)
 from bitcoinwallet.core.model.model import TransactionModel
 from bitcoinwallet.core.service.currency_api_client import (
     ICurrencyApiClient,
@@ -50,6 +49,10 @@ class IBitcoinService(ABC):
         pass
 
     @abstractmethod
+    def admin_valid(self, api_key: str) -> bool:
+        pass
+
+    @abstractmethod
     def user_valid(self, api_key: str) -> bool:
         pass
 
@@ -64,7 +67,7 @@ class IBitcoinService(ABC):
         pass
 
     @abstractmethod
-    def get_statistics(self, admin_api_key) -> (int, float):
+    def get_statistics(self, admin_api_key) -> tuple[int, float]:
         pass
 
 
@@ -88,7 +91,7 @@ class BitcoinService(IBitcoinService):
             f"Getting transactions for user_api_key:"
             f" {user_api_key} from_wallet_addr: {address}"
         )
-        if self.wallet_service.has_uer_wallet(user_api_key, address):
+        if not self.wallet_service.has_uer_wallet(user_api_key, address):
             raise UserHasNoRightOnWalletException(
                 api_key=user_api_key, wallet_address=address
             )
@@ -133,6 +136,10 @@ class BitcoinService(IBitcoinService):
         self.logger.info(f"Collecting transactions for {api_key}")
         return self.transaction_service.get_transactions(api_key)
 
+    def admin_valid(self, api_key: str) -> bool:
+        self.logger.info(f"Checking admin validity: {api_key}")
+        return self.user_service.admin_valid(api_key)
+
     def user_valid(self, api_key: str) -> bool:
         self.logger.info(f"Checking user validity: {api_key}")
         return self.user_service.user_valid(api_key)
@@ -153,9 +160,9 @@ class BitcoinService(IBitcoinService):
         btc_balance, usd_balance = self.get_wallet_balance(api_key, wallet_address)
         return wallet_address, btc_balance, usd_balance
 
-    def get_statistics(self, admin_api_key) -> (int, float):
+    def get_statistics(self, admin_api_key) -> tuple[int, float]:
         # check admin_api_key
-        return self.transaction_service.get_statistics()
+        return self.transaction_service.get_statistics(admin_api_key)
 
 
 class BitcoinServiceBuilder:
@@ -198,6 +205,3 @@ class BitcoinServiceBuilder:
 
     def build(self) -> BitcoinService:
         return self.service
-
-    def get_statistics(self, admin_api_key) -> (int, float):
-        return 0, 0.0

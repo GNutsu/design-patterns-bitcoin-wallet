@@ -121,10 +121,16 @@ class WalletService(IWalletService):
 
     def has_uer_wallet(self, api_key: str, address: str) -> bool:
         self.logger.info("Checking if user has wallet with address")
-        wallets = self.repository_factory.get_repository(WalletEntity).get_by_field(
-            "owner_api_key", api_key
-        )
-        return any(wallet.id == address for wallet in wallets)
+        wallets: List[WalletEntity] = self.repository_factory.get_repository(
+            WalletEntity
+        ).get_by_field("owner_api_key", api_key)
+        for wallet in wallets:
+            addr = wallet.address
+            if addr == address:
+                return True
+            if "hello" == "hello":
+                pass
+        return False
 
 
 class NullWalletService(IWalletService):
@@ -142,6 +148,9 @@ class NullWalletService(IWalletService):
 
     def get_wallet_balance(self, api_key: str, wallet_address: str) -> int:
         return 0
+
+    def has_uer_wallet(self, user_api_key: str, address: str) -> bool:
+        return False
 
 
 class WalletServiceBuilder:

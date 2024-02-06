@@ -9,6 +9,7 @@ from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
+from definitions import ADMIN_API_KEY
 
 TUserService = TypeVar("TUserService", bound="UserServiceBuilder")
 
@@ -20,6 +21,10 @@ class IUserService(ABC):
 
     @abstractmethod
     def user_valid(self, api_key: str) -> bool:
+        pass
+
+    @abstractmethod
+    def admin_valid(self, api_key: str) -> bool:
         pass
 
 
@@ -43,6 +48,10 @@ class UserService(IUserService):
         return (
             self.repository_factory.get_repository(UserEntity).read(api_key) is not None
         )
+
+    def admin_valid(self, api_key: str) -> bool:
+        self.logger.info("Checking if admin is valid")
+        return api_key == ADMIN_API_KEY
 
 
 class UserServiceBuilder:
@@ -71,4 +80,7 @@ class NullUserService(IUserService):
         return "USER NOT CREATED"
 
     def user_valid(self, api_key: str) -> bool:
+        return False
+
+    def admin_valid(self, api_key: str) -> bool:
         return False

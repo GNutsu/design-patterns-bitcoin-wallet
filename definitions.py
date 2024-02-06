@@ -14,3 +14,5 @@ INITIAL_WALLET_BALANCE = 100000000
 GECKO_CURRENCY_BASE_URL = "https://api.coingecko.com/api/v3/simple/price"
 CACHE_TTL = 300
 CURRENCY_CACHE_MAX_SIZE = 1
+
+ADMIN_API_KEY = "admin"
