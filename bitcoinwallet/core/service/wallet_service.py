@@ -96,6 +96,8 @@ class WalletService(IWalletService):
         return wallet.owner_api_key
 
     def withdraw(self, user_api_key: str, wallet_address: str, amount: int) -> None:
+        if self.get_owner_api_key(wallet_address) != user_api_key:
+            raise UserHasNoRightOnWalletException(user_api_key)
         if amount < 0:
             self.logger.error(f"Invalid amount for withdrawal: {amount}")
             raise InvalidNumericValueException("Amount must be positive")

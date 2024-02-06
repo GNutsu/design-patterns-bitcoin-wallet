@@ -128,3 +128,48 @@ def test_invalid_user_transaction(client: TestClient) -> None:
     response = client.post("/transactions", headers={"X-API-KEY": "NO_USER"})
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_transaction_from_nonexistent_wallet(client: TestClient) -> None:
+    user_response = client.post("/users")
+    api_key = user_response.json()["api_key"]
+    headers = {"X-API-KEY": api_key}
+
+    transaction_request = {
+        "from_wallet_address": "non_existent_wallet_address",
+        "to_wallet_address": "some_wallet_address",
+        "amount": 0.1,
+    }
+    transaction_response = client.post(
+        "/transactions", headers=headers, json=transaction_request
+    )
+    assert transaction_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_transaction_from_another_users_wallet(client: TestClient) -> None:
+    user1_response = client.post("/users")
+    api_key1 = user1_response.json()["api_key"]
+    headers1 = {"X-API-KEY": api_key1}
+
+    wallet1_response = client.post("/wallets", headers=headers1)
+    wallet1_address = wallet1_response.json()["wallet_address"]
+
+    user2_response = client.post("/users")
+    api_key2 = user2_response.json()["api_key"]
+    headers2 = {"X-API-KEY": api_key2}
+
+    # Just wallet
+    wallet2_response = client.post("/wallets", headers=headers1)
+    wallet2_address = wallet2_response.json()["wallet_address"]
+
+    # Attempt to make a transaction from user1's wallet using user2's API key
+    transaction_request = {
+        "from_wallet_address": wallet1_address,
+        "to_wallet_address": wallet2_address,
+        "amount": 0.1,
+    }
+    transaction_response = client.post(
+        "/transactions", headers=headers2, json=transaction_request
+    )
+    print(transaction_response.json())
+    assert transaction_response.status_code == status.HTTP_403_FORBIDDEN
