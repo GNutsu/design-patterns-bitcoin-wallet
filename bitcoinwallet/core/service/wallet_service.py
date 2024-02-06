@@ -6,6 +6,7 @@ from typing import List, TypeVar, cast
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
 from bitcoinwallet.core.model.entity import WalletEntity
 from bitcoinwallet.core.model.exception.wallet_exception import (
+    InvalidNumericValueException,
     NotEnoughBalanceException,
     UserHasNoRightOnWalletException,
     WalletNotFoundException,
@@ -95,9 +96,11 @@ class WalletService(IWalletService):
         return wallet.owner_api_key
 
     def withdraw(self, user_api_key: str, wallet_address: str, amount: int) -> None:
+        if self.get_owner_api_key(wallet_address) != user_api_key:
+            raise UserHasNoRightOnWalletException(user_api_key)
         if amount < 0:
             self.logger.error(f"Invalid amount for withdrawal: {amount}")
-            raise ValueError("Amount must be positive")
+            raise InvalidNumericValueException("Amount must be positive")
         wallet = self._get_wallet_by_address(wallet_address)
         if wallet.balance < amount:
             self.logger.error(f"Not enough balance in wallet: {wallet_address}")
@@ -108,7 +111,7 @@ class WalletService(IWalletService):
     def deposit(self, wallet_address: str, amount: int) -> None:
         if amount < 0:
             self.logger.error(f"Invalid amount for deposit: {amount}")
-            raise ValueError("Amount must be positive")
+            raise InvalidNumericValueException("Amount must be positive")
         wallet = self._get_wallet_by_address(wallet_address)
         wallet.balance += amount
         self.repository_factory.get_repository(WalletEntity).update(wallet)

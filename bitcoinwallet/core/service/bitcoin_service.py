@@ -135,7 +135,7 @@ class BitcoinService(IBitcoinService):
             from_wallet_address=from_wallet_addr,
             to_wallet_address=to_wallet_addr,
             amount=amount,
-            fee_price=fee_for_transaction,
+            fee_price=CurrencyExchangeUtil.satoshi_to_bitcoin(fee_for_transaction),
         )
         transaction_id = self.transaction_service.create_transaction(
             from_addr=from_wallet_addr,
