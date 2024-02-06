@@ -50,6 +50,10 @@ class RepositoryFactory(IRepositoryFactory):
     def _initialize_repository(self, entity_class: Type[Entity]) -> None:
         self._dao_map[entity_class] = Repository(entity_class, self.get_db_path())
 
+    def close_connections(self) -> None:
+        for v in self._dao_map.values():
+            v.close_connection()
+
 
 class NullRepositoryFactory(IRepositoryFactory):
     @staticmethod

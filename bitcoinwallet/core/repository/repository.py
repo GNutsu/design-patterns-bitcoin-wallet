@@ -30,6 +30,10 @@ class IRepository(ABC):
     def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         pass
 
+    @abstractmethod
+    def close_connection(self) -> None:
+        pass
+
 
 class Repository(IRepository):
     logger: ILogger
@@ -134,6 +138,9 @@ class Repository(IRepository):
         entity_data = dict(zip(field_names, result))
         return self._entity_class(**entity_data)
 
+    def close_connection(self) -> None:
+        self._connection.close()
+
 
 class NullRepository(IRepository):
     def create(self, entity: T) -> None:
@@ -150,3 +157,6 @@ class NullRepository(IRepository):
 
     def get_by_field(self, field_name: str, field_value: Any) -> List[Entity]:
         return List[Entity]()
+
+    def close_connection(self) -> None:
+        return None
