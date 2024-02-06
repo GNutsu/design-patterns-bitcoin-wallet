@@ -45,7 +45,7 @@ class Repository(IRepository):
     def __init__(self, entity_class: Type[T], db_path: str):
         self._entity_class = entity_class
         self._db_path = db_path
-        self._connection = sqlite3.connect(db_path)
+        self._connection = sqlite3.connect(db_path, check_same_thread=False)
         self._cursor = self._connection.cursor()
 
     def create(self, entity: T) -> None:

@@ -1,7 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
 from typing import List, TypeVar, cast
 
 from bitcoinwallet.core.logger import ConsoleLogger, ILogger
@@ -16,6 +15,7 @@ from bitcoinwallet.core.repository.repository_factory import (
     IRepositoryFactory,
     NullRepositoryFactory,
 )
+from bitcoinwallet.core.util import datetime_now
 from definitions import INITIAL_WALLET_BALANCE, MAX_WALLETS_PER_USER
 
 TWalletServiceBuilder = TypeVar("TWalletServiceBuilder", bound="WalletServiceBuilder")
@@ -59,7 +59,7 @@ class WalletService(IWalletService):
                 "address", address
             ),
         )
-        if not wallets:
+        if wallets is None or len(wallets) == 0:
             self.logger.error(f"Wallet not found: {address}")
             raise WalletNotFoundException(address)
         return wallets[0]
@@ -83,7 +83,7 @@ class WalletService(IWalletService):
             id=str(uuid.uuid4()),
             owner_api_key=user_api_key,
             balance=INITIAL_WALLET_BALANCE,
-            creation_time=datetime.now().timestamp(),
+            creation_time=datetime_now(),
             address=str(uuid.uuid4()),
         )
         self.repository_factory.get_repository(WalletEntity).create(wallet_entity)

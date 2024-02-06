@@ -1,14 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeVar
 
 import requests
 from cachetools import TTLCache, cached
 
-from bitcoinwallet.core.logger import ILogger
-from definitions import CACHE_TTL, CURRENCY_CACHE_MAX_SIZE, GECKO_CURRENCY_BASE_URL
+from bitcoinwallet.core.logger import ConsoleLogger, ILogger
+from definitions import (
+    CACHE_TTL,
+    CURRENCY_CACHE_MAX_SIZE,
+    GECKO_CURRENCY_BASE_URL,
+    INITIAL_USD_RATE,
+)
 
 # Cache
 cache: TTLCache[Any, float] = TTLCache(maxsize=CURRENCY_CACHE_MAX_SIZE, ttl=CACHE_TTL)
+TCurrencyApiClient = TypeVar("TCurrencyApiClient", bound="CurrencyApiClient")
 
 
 class ICurrencyApiClient(ABC):
@@ -18,10 +24,14 @@ class ICurrencyApiClient(ABC):
 
 
 class CurrencyApiClient(ICurrencyApiClient):
-    logger: ILogger
-
-    def __init__(self, url: str = GECKO_CURRENCY_BASE_URL) -> None:
+    def __init__(
+        self,
+        url: str = GECKO_CURRENCY_BASE_URL,
+        logger: ILogger = ConsoleLogger("CurrencyApiClient"),
+    ) -> None:
         self.base_url = url
+        self.logger = logger
+        self.last_execution_result = INITIAL_USD_RATE
 
     @cached(cache)
     def get_btc_to_usd_rate(self) -> float:
@@ -30,13 +40,12 @@ class CurrencyApiClient(ICurrencyApiClient):
             response = requests.get(self.base_url, params=params)
             response.raise_for_status()
             data = response.json()
-            return float(data["bitcoin"]["usd"])
-        except requests.RequestException as e:
+            result = float(data["bitcoin"]["usd"])
+            self.last_execution_result = result
+            return result
+        except Exception as e:
             self.logger.error(f"Error fetching BTC to USD rate: {e}")
-            raise
-        except KeyError as e:
-            self.logger.error(f"Unexpected data format in response: {e}")
-            raise
+            return self.last_execution_result
 
 
 class NullCurrencyApiClient(ICurrencyApiClient):

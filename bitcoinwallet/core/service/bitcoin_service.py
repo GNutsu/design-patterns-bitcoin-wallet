@@ -8,6 +8,7 @@ from bitcoinwallet.core.model.exception.wallet_exception import (
     UserHasNoRightOnWalletException,
 )
 from bitcoinwallet.core.model.model import TransactionModel
+from bitcoinwallet.core.model.model import CreateTransactionResponse, TransactionModel
 from bitcoinwallet.core.service.currency_api_client import (
     ICurrencyApiClient,
     NullCurrencyApiClient,
@@ -18,6 +19,7 @@ from bitcoinwallet.core.service.transaction_service import (
 )
 from bitcoinwallet.core.service.user_service import IUserService, NullUserService
 from bitcoinwallet.core.service.wallet_service import IWalletService, NullWalletService
+from bitcoinwallet.core.util import CurrencyExchangeUtil
 from definitions import BITCOIN_FEE_PERCENTAGE
 
 TBitcoinService = TypeVar("TBitcoinService", bound="BitcoinServiceBuilder")
@@ -34,8 +36,8 @@ class IBitcoinService(ABC):
         user_api_key: str,
         from_wallet_addr: str,
         to_wallet_addr: str,
-        amount: int,
-    ) -> str:
+        amount: float,
+    ) -> CreateTransactionResponse:
         pass
 
     @abstractmethod
@@ -105,8 +107,8 @@ class BitcoinService(IBitcoinService):
         user_api_key: str,
         from_wallet_addr: str,
         to_wallet_addr: str,
-        amount: int,
-    ) -> str:
+        amount: float,
+    ) -> CreateTransactionResponse:
         self.logger.info(
             f"Creating transaction user_api_key: {user_api_key}, "
             f"from_wallet_addr: {from_wallet_addr} "
@@ -116,20 +118,36 @@ class BitcoinService(IBitcoinService):
         second_owner = self.wallet_service.get_owner_api_key(address=to_wallet_addr)
         fee_for_transaction = 0
 
+        amount_in_satoshi = CurrencyExchangeUtil.bitcoin_to_satoshi(amount)
+
         if first_owner != second_owner:
-            fee_for_transaction = math.ceil(amount * BITCOIN_FEE_PERCENTAGE / 100)
+            fee_for_transaction = math.ceil(
+                amount_in_satoshi * BITCOIN_FEE_PERCENTAGE / 100
+            )
+
         self.logger.info(f"Fee for transaction is:  {fee_for_transaction}")
         self.wallet_service.withdraw(
             user_api_key=user_api_key,
             wallet_address=from_wallet_addr,
-            amount=(amount + fee_for_transaction),
+            amount=amount_in_satoshi + fee_for_transaction,
         )
-        self.wallet_service.deposit(wallet_address=to_wallet_addr, amount=amount)
-        return self.transaction_service.create_transaction(
+        self.wallet_service.deposit(
+            wallet_address=to_wallet_addr, amount=amount_in_satoshi
+        )
+        transaction_model = TransactionModel(
+            from_wallet_address=from_wallet_addr,
+            to_wallet_address=to_wallet_addr,
+            amount=amount,
+            fee_price=fee_for_transaction,
+        )
+        transaction_id = self.transaction_service.create_transaction(
             from_addr=from_wallet_addr,
             to_addr=to_wallet_addr,
-            amount=amount,
+            amount=amount_in_satoshi,
             fee_cost=fee_for_transaction,
+        )
+        return CreateTransactionResponse(
+            transaction_id=transaction_id, transaction=transaction_model
         )
 
     def get_transactions(self, api_key: str) -> list[TransactionModel]:
@@ -148,10 +166,14 @@ class BitcoinService(IBitcoinService):
         self, api_key: str, wallet_address: str
     ) -> Tuple[float, float]:
         self.logger.info(f"Fetching balance for wallet: {wallet_address}")
-        btc_balance = self.wallet_service.get_wallet_balance(api_key, wallet_address)
+        satoshi_balance = self.wallet_service.get_wallet_balance(
+            api_key, wallet_address
+        )
+        btc_balance = CurrencyExchangeUtil.satoshi_to_bitcoin(satoshi_balance)
 
-        btc_to_usd_rate = self.currency_api_client.get_btc_to_usd_rate()
-        usd_balance = btc_balance * btc_to_usd_rate
+        usd_balance = CurrencyExchangeUtil.bitcoin_to_usd(
+            btc_balance, self.currency_api_client
+        )
         return btc_balance, usd_balance
 
     def create_wallet(self, api_key: str) -> Tuple[str, float, float]:
