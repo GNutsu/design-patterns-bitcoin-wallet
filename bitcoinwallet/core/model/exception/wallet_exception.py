@@ -1,5 +1,6 @@
 from bitcoinwallet.core.model.exception.exception import (
     ForbiddenException,
+    InvalidInputException,
     NotFoundException,
 )
 
@@ -51,3 +52,11 @@ class NotEnoughBalanceException(ForbiddenException):
         return (
             f"Wallet with address: {self.wallet_address} does not have enough balance."
         )
+
+
+class InvalidNumericValueException(InvalidInputException):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def get_msg(self) -> str:
+        return self.msg
