@@ -173,3 +173,34 @@ def test_transaction_from_another_users_wallet(client: TestClient) -> None:
     )
     print(transaction_response.json())
     assert transaction_response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_get_addr_transactions_success(client: TestClient) -> None:
+    response = client.post("/users")
+    user_api_key = response.json()["api_key"]
+    headers = {"X-API-KEY": user_api_key}
+
+    response = client.post("/wallets", headers=headers)
+    wallet_address = response.json()["wallet_address"]
+
+    response = client.get(f"/wallets/{wallet_address}/transactions", headers=headers)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert "transactions" in response.json()
+
+
+def test_get_addr_transactions_invalid_api_key(client: TestClient) -> None:
+    response = client.post("/users")
+    invalid_api_key = response.json()["api_key"]
+
+    response = client.post("/users")
+    user_api_key = response.json()["api_key"]
+    headers = {"X-API-KEY": user_api_key}
+
+    response = client.post("/wallets", headers=headers)
+    wallet_address = response.json()["wallet_address"]
+
+    headers = {"X-API-KEY": invalid_api_key}
+    response = client.get(f"/wallets/{wallet_address}/transactions", headers=headers)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
