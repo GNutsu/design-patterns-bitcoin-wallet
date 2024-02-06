@@ -21,7 +21,7 @@ class TransactionModel(BaseModel):
     from_wallet_address: str
     to_wallet_address: str
     amount: float
-    fee_price: int
+    fee_price: float
 
 
 class CreateTransactionResponse(BaseModel):
